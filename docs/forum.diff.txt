@@ -1,6 +1,6 @@
 --- a/examples/forum-anon-login/src/App.before.tsx
 +++ b/examples/forum-anon-login/src/App.tsx
-@@ -1,60 +1,74 @@
+@@ -1,60 +1,75 @@
 -// BEFORE — a plain internal feedback forum. You log in with your real
 -// company account, so every "candid" post is tied to your real name
 -// forever, which defeats the point. Not wired into the Vite build; it's
@@ -71,6 +71,7 @@
 +
 +import React, { useState } from "react";
 +import { MidnightZapProvider, ProveMembership } from "@midnightzap/sdk/react";
++import { contracts } from "./midnight.js";
 +
 +// Stand-in for a credential this employee was already issued (e.g. at
 +// onboarding) and holds locally — never uploaded to the forum.
@@ -130,7 +131,7 @@
 +
 +export function App() {
 +  return (
-+    <MidnightZapProvider>
++    <MidnightZapProvider contracts={contracts} network="testnet">
 +      <Forum />
 +    </MidnightZapProvider>
 +  );

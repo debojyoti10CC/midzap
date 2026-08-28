@@ -1,90 +1,133 @@
 import type {
+  ContractBinding,
+  ContractBindings,
   ProofBackend,
   ProofRequest,
   ProofResult,
   ProofStatus,
+  PredicateKind,
 } from "./types.js";
+import {
+  configureProviders,
+  contractHelpers,
+  type MidnightProviders,
+} from "../live/providers.js";
+import {
+  thresholdWitnesses,
+  membershipWitnesses,
+  expiryWitnesses,
+} from "../live/witnesses.js";
 
 /**
  * LiveMidnightBackend
  * ---------------------
- * The real adapter: discovers a Midnight-compatible wallet (Lace and
- * others expose an injected connector), connects to it, and submits proof
- * requests to the deployed MidnightZap predicate contracts compiled from
- * /compact/*.compact.
+ * Real proofs against a real Midnight network. Flow per request:
  *
- * What is real here: wallet discovery + connection against the injected
- * `window.midnight` connector API, the status lifecycle, and the shape of
- * the witness / circuit call. What is NOT wired: the deployed contract
- * addresses — `compact compile && deploy` each template first and pass the
- * results to `contracts` (or set them in `CONTRACT_ADDRESSES`). Until then
- * `requestProof` throws a precise error at exactly that step rather than
- * pretending to submit.
+ *   1. discover + connect the injected wallet, build the midnight-js
+ *      providers (once, cached).
+ *   2. load the `compactc` output for the predicate's circuit (the app
+ *      supplies the import via `bindings`).
+ *   3. seed the circuit's private state from the component's getter,
+ *      on-device.
+ *   4. `findDeployedContract(...)` at the deployed address, then call the
+ *      circuit — proof generation runs client-side in the wallet/prover;
+ *      the private input never leaves the device.
+ *   5. submit, await finality, return the tx id as the receipt.
  *
- * Package call shapes for `@midnight-ntwrk/dapp-connector-api` /
- * `@midnight-ntwrk/midnight-js-contracts` move quickly post-mainnet;
- * confirm against your installed versions. The two `// CONFIRM:` markers
- * below are the only places that touch those APIs.
+ * Prerequisites (one-time — see compact/README.md and docs/GO_LIVE.md):
+ *   - `compactc compile` each template, copy `managed/<circuit>/` into your
+ *     app's `public/`.
+ *   - deploy each contract once; put the addresses in `bindings`.
+ *   - install the `@midnight-ntwrk/*` peer deps.
  */
 
-export interface DeployedContract {
-  /** On-chain address of the deployed predicate contract. */
-  address: string;
-  /** Circuit entrypoint name inside that contract. */
+interface CircuitSpec {
   circuit: string;
+  privateStateId: string;
+  witnesses: unknown;
+  toPrivateState: (input: Record<string, unknown>) => unknown;
+  publicArgs: (req: ProofRequest, input: Record<string, unknown>) => Promise<unknown[]>;
 }
 
-/** Fill these in once you've deployed the templates (or pass `contracts`). */
-const CONTRACT_ADDRESSES: Partial<Record<ProofRequest["predicate"]["kind"], DeployedContract>> = {
-  // threshold: { address: "0x...", circuit: "proveThreshold" },
-  // membership: { address: "0x...", circuit: "proveMembership" },
-  // "credential-valid": { address: "0x...", circuit: "proveCredentialValid" },
+const SPECS: Record<PredicateKind, CircuitSpec> = {
+  threshold: {
+    circuit: "proveThreshold",
+    privateStateId: "mz-threshold",
+    witnesses: thresholdWitnesses,
+    toPrivateState: (i) => ({ value: BigInt(Number(i.value)) }),
+    publicArgs: async (req) => {
+      if (req.predicate.kind !== "threshold") return [];
+      return [await sha256Bytes(req.subjectId), BigInt(req.predicate.threshold)];
+    },
+  },
+  membership: {
+    circuit: "proveMembership",
+    privateStateId: "mz-membership",
+    witnesses: membershipWitnesses,
+    toPrivateState: (i) => {
+      if (i.merklePath == null) {
+        throw new Error(
+          "Live membership proofs need the caller's Merkle path. Pass it from " +
+            "<ProveMembership getExtraWitness={() => ({ merklePath })} /> — your " +
+            "set operator's tree service produces it from the member secret."
+        );
+      }
+      return { memberSecret: toBytes32(i.memberSecret), merklePath: i.merklePath };
+    },
+    publicArgs: async (req) => {
+      if (req.predicate.kind !== "membership") return [];
+      return [await sha256Bytes(`${req.predicate.set}:${req.predicate.actionTag}`)];
+    },
+  },
+  "credential-valid": {
+    circuit: "proveCredentialValid",
+    privateStateId: "mz-expiry",
+    witnesses: expiryWitnesses,
+    toPrivateState: (i) => {
+      for (const k of ["issuerPublicKey", "issuerSignature", "credentialHash"] as const) {
+        if (i[k] == null) {
+          throw new Error(
+            `Live credential proofs need \`${k}\` from the signed credential. Pass ` +
+              "them from <ProveCredentialValid getExtraWitness={() => ({ issuerPublicKey, " +
+              "issuerSignature, credentialHash })} />."
+          );
+        }
+      }
+      return {
+        expiresAtUnix: BigInt(Number(i.expiresAtUnix)),
+        issuerPublicKey: toBytes32(i.issuerPublicKey),
+        issuerSignature: toBytes(i.issuerSignature),
+        credentialHash: toBytes32(i.credentialHash),
+      };
+    },
+    publicArgs: async () => [BigInt(Math.floor(Date.now() / 1000))],
+  },
 };
 
 export interface LiveMidnightBackendOptions {
-  /** e.g. "testnet" | "mainnet" — passed through to the wallet connector. */
+  /** e.g. "testnet" | "mainnet" — informational; the wallet decides the network. */
   network?: string;
-  /** Which injected connector to use, e.g. "mnLace". Auto-detected if unset. */
+  /** Injected connector key, e.g. "mnLace". Auto-detected if unset. */
   walletName?: string;
-  /** Deployed predicate contracts, keyed by predicate kind. Overrides CONTRACT_ADDRESSES. */
-  contracts?: Partial<Record<ProofRequest["predicate"]["kind"], DeployedContract>>;
-}
-
-interface InjectedConnector {
-  enable(): Promise<WalletApi>;
-  isEnabled(): Promise<boolean>;
-  apiVersion?: string;
-}
-interface WalletApi {
-  state(): Promise<unknown>;
-  // CONFIRM: proof + submit surface of your installed dapp-connector version.
-  [key: string]: unknown;
+  /** Where the browser fetches compiled `managed/<circuit>/` zk-params. Defaults to page origin. */
+  zkAssetsBaseUrl?: string;
+  /** Deployed predicate contracts, keyed by predicate kind. */
+  bindings?: ContractBindings;
 }
 
 export class LiveMidnightBackend implements ProofBackend {
-  private walletApi: WalletApi | null = null;
+  private providersP: Promise<{ providers: MidnightProviders }> | null = null;
 
   constructor(private opts: LiveMidnightBackendOptions = {}) {}
 
-  private get contracts() {
-    return { ...CONTRACT_ADDRESSES, ...this.opts.contracts };
-  }
-
   async connect(): Promise<void> {
-    if (this.walletApi) return;
-
-    const injected = discoverConnector(this.opts.walletName);
-    if (!injected) {
-      throw new Error(
-        "No Midnight wallet found. Install a Midnight-compatible wallet " +
-          "extension (e.g. Lace) and reload, or use MockProofBackend for " +
-          "local development."
-      );
+    if (!this.providersP) {
+      this.providersP = configureProviders({
+        walletName: this.opts.walletName,
+        zkAssetsBaseUrl: this.opts.zkAssetsBaseUrl,
+      });
     }
-
-    // CONFIRM: `.enable()` is the standard injected-connector handshake;
-    // some versions take a { network } argument.
-    this.walletApi = await injected.enable();
+    await this.providersP;
   }
 
   async requestProof(
@@ -93,67 +136,56 @@ export class LiveMidnightBackend implements ProofBackend {
     onStatus?: (status: ProofStatus) => void
   ): Promise<ProofResult> {
     const emit = (s: ProofStatus) => onStatus?.(s);
+    const kind = req.predicate.kind;
+    const binding = this.opts.bindings?.[kind];
 
-    emit("connecting-wallet");
-    await this.connect();
-
-    const contract = this.contracts[req.predicate.kind];
-    if (!contract) {
-      return {
-        status: "error",
-        verified: false,
-        error:
-          `No deployed contract configured for the "${req.predicate.kind}" predicate. ` +
-          `Compile compact/${templateFile(req.predicate.kind)} with the \`compact\` ` +
-          `toolchain, deploy it, and pass its address via ` +
-          `new LiveMidnightBackend({ contracts: { "${req.predicate.kind}": { address, circuit } } }).`,
-      };
+    if (!binding) {
+      return err(
+        `No deployed contract configured for the "${kind}" predicate. Compile ` +
+          `compact/${templateFile(kind)} with \`compactc\`, deploy it once, and pass ` +
+          `<MidnightZapProvider contracts={{ "${kind}": { address, load } }}>. ` +
+          `See docs/GO_LIVE.md.`
+      );
     }
 
-    emit("generating-proof");
-    const witness = buildWitness(req, privateInput);
+    try {
+      emit("connecting-wallet");
+      await this.connect();
+      const { providers } = await this.providersP!;
+      const findDeployed = contractHelpers.findDeployedContract;
+      if (!findDeployed) return err("midnight-js contract helpers unavailable — check the @midnight-ntwrk peer deps.");
 
-    // CONFIRM: contract-call + local proof generation entrypoint of
-    // @midnight-ntwrk/midnight-js-contracts for your installed version.
-    // The private `witness` is consumed inside the wallet; only the proof
-    // and public inputs leave the device.
-    //
-    //   const { txHash } = await callContract({
-    //     wallet: this.walletApi,
-    //     address: contract.address,
-    //     circuit: contract.circuit,
-    //     publicInputs: publicInputsFor(req),
-    //     witness,
-    //     network: this.opts.network ?? "testnet",
-    //   });
-    void witness;
+      const spec = SPECS[kind];
+      const mod = await binding.load();
+      const Contract = mod.Contract;
 
-    emit("submitting");
-    // const receipt = await awaitFinality(txHash);
-    // emit("verified");
-    // return { status: "verified", verified: true, receipt: txHash };
+      await providers.privateStateProvider.set(spec.privateStateId, spec.toPrivateState(privateInput));
 
-    return {
-      status: "error",
-      verified: false,
-      error:
-        "LiveMidnightBackend: contract address is set but the submit call is " +
-        "commented out — un-comment the @midnight-ntwrk/midnight-js-contracts " +
-        "block once confirmed against your installed SDK version.",
-    };
+      const deployed = (await findDeployed(providers, {
+        contractAddress: binding.address,
+        contract: new Contract(spec.witnesses),
+        privateStateId: spec.privateStateId,
+      })) as { callTx: Record<string, (...a: unknown[]) => Promise<{ public: { txId: string } }>> };
+
+      emit("generating-proof");
+      const args = await spec.publicArgs(req, privateInput);
+
+      emit("submitting");
+      const finalized = await deployed.callTx[spec.circuit](...args);
+
+      emit("verified");
+      return { status: "verified", verified: true, receipt: finalized.public.txId };
+    } catch (e) {
+      return err(e instanceof Error ? e.message : String(e));
+    }
   }
 }
 
-function discoverConnector(preferred?: string): InjectedConnector | null {
-  if (typeof window === "undefined") return null;
-  const mn = (window as unknown as { midnight?: Record<string, InjectedConnector> }).midnight;
-  if (!mn) return null;
-  if (preferred && mn[preferred]) return mn[preferred];
-  const first = Object.values(mn)[0];
-  return first ?? null;
+function err(error: string): ProofResult {
+  return { status: "error", verified: false, error };
 }
 
-function templateFile(kind: ProofRequest["predicate"]["kind"]): string {
+function templateFile(kind: PredicateKind): string {
   return kind === "threshold"
     ? "threshold_proof.compact"
     : kind === "membership"
@@ -161,25 +193,32 @@ function templateFile(kind: ProofRequest["predicate"]["kind"]): string {
     : "expiry_proof.compact";
 }
 
-/** Assemble the private witness object the circuit expects, per predicate. */
-function buildWitness(
-  req: ProofRequest,
-  privateInput: Record<string, unknown>
-): Record<string, unknown> {
-  switch (req.predicate.kind) {
-    case "threshold":
-      return { privateValue: BigInt(Number(privateInput.value)) };
-    case "membership":
-      return {
-        memberSecret: String(privateInput.memberSecret ?? ""),
-        // merkleProof is fetched from the set operator's tree service in a
-        // real deployment; wire that here.
-      };
-    case "credential-valid":
-      return {
-        expiresAtUnix: BigInt(Number(privateInput.expiresAtUnix)),
-        // issuerPublicKey / issuerSignature / credentialHash come from the
-        // locally-held signed credential in a real deployment.
-      };
+async function sha256Bytes(input: string): Promise<Uint8Array> {
+  const data = new TextEncoder().encode(input);
+  if (typeof crypto !== "undefined" && crypto.subtle) {
+    return new Uint8Array(await crypto.subtle.digest("SHA-256", data));
   }
+  throw new Error("WebCrypto SHA-256 unavailable in this environment.");
 }
+
+function toBytes(v: unknown): Uint8Array {
+  if (v instanceof Uint8Array) return v;
+  const s = String(v);
+  if (/^(0x)?[0-9a-fA-F]+$/.test(s)) {
+    const hex = s.replace(/^0x/, "");
+    const out = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+    return out;
+  }
+  return new TextEncoder().encode(s);
+}
+
+function toBytes32(v: unknown): Uint8Array {
+  const b = toBytes(v);
+  if (b.length === 32) return b;
+  const out = new Uint8Array(32);
+  out.set(b.subarray(0, 32));
+  return out;
+}
+
+export type { ContractBinding };

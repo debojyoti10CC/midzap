@@ -1,6 +1,6 @@
 --- a/examples/ecommerce-age-gate/src/App.before.tsx
 +++ b/examples/ecommerce-age-gate/src/App.tsx
-@@ -1,33 +1,50 @@
+@@ -1,33 +1,51 @@
 -// BEFORE — an ordinary web2 checkout. "Age verification" is a self-reported
 -// checkbox, which proves nothing. Not wired into the Vite build; it's the
 -// "before" half of the story. Diff vs App.tsx: docs/ecommerce.diff.txt.
@@ -41,6 +41,7 @@
 +
 +import React, { useState } from "react";
 +import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
++import { contracts } from "./midnight.js";
 +
 +// Stand-in for however this app already knows the user's birth year
 +// (account profile, a previously-issued credential, etc). MidnightZap
@@ -79,7 +80,7 @@
 +
 +export function App() {
 +  return (
-+    <MidnightZapProvider>
++    <MidnightZapProvider contracts={contracts} network="testnet">
 +      <Checkout />
 +    </MidnightZapProvider>
 +  );

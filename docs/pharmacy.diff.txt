@@ -1,6 +1,6 @@
 --- a/examples/pharmacy-refill/src/App.before.tsx
 +++ b/examples/pharmacy-refill/src/App.tsx
-@@ -1,13 +1,22 @@
+@@ -1,13 +1,23 @@
 -// BEFORE — an online pharmacy refill flow. To refill, you upload a photo of
 -// your paper prescription, which the pharmacy stores: it now holds an image
 -// of a medical document with your name, drug, prescriber, and dates on it.
@@ -16,6 +16,7 @@
  
  import React, { useState } from "react";
 +import { MidnightZapProvider, ProveCredentialValid } from "@midnightzap/sdk/react";
++import { contracts } from "./midnight.js";
  
 -export function App() {
 -  const [file, setFile] = useState<File | null>(null);
@@ -30,7 +31,7 @@
    const [refilled, setRefilled] = useState(false);
  
    return (
-@@ -17,19 +26,29 @@
+@@ -17,19 +27,29 @@
          <p className="drug">Atorvastatin 20mg — 90 tablets</p>
          <p>Refill requires a valid, current prescription.</p>
  
@@ -67,7 +68,7 @@
 +
 +export function App() {
 +  return (
-+    <MidnightZapProvider>
++    <MidnightZapProvider contracts={contracts} network="testnet">
 +      <Refill />
 +    </MidnightZapProvider>
 +  );

@@ -63,14 +63,31 @@ export interface ProofResult {
 }
 
 /**
+ * Points the live backend at one deployed predicate contract. The app owns
+ * this because only the app knows where its `compactc` output lives.
+ *
+ *   {
+ *     address: "0x…",                                     // from your one-time deploy
+ *     load: () => import("./managed/threshold/contract/index.cjs"),
+ *   }
+ */
+export interface ContractBinding {
+  address: string;
+  load: () => Promise<{ Contract: new (witnesses: unknown) => unknown } & Record<string, unknown>>;
+}
+
+export type ContractBindings = Partial<Record<PredicateKind, ContractBinding>>;
+
+/**
  * A ProofBackend is anything that can turn a ProofRequest + locally-held
  * private data into a ProofResult. This indirection is what lets the same
  * <ProveThreshold /> component run against:
- *   - MockProofBackend   → deterministic, offline, zero network calls
- *                          (used by both example apps in this repo so they
- *                          run instantly in a hackathon demo / on a plane)
- *   - LiveMidnightBackend → real wallet connection, real Compact contract
- *                          calls, real Midnight testnet/mainnet proofs
+ *   - LiveMidnightBackend  → real wallet connection, real Compact contract
+ *                           calls, real Midnight testnet/mainnet proofs.
+ *                           This is the default.
+ *   - InMemoryProofBackend → evaluates the same accept/reject logic the
+ *                           circuits enforce, with no network. For unit
+ *                           tests only — not a way to run the app.
  */
 export interface ProofBackend {
   connect(): Promise<void>;

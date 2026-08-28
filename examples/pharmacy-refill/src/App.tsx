@@ -8,6 +8,7 @@
 
 import React, { useState } from "react";
 import { MidnightZapProvider, ProveCredentialValid } from "@midnightzap/sdk/react";
+import { contracts } from "./midnight.js";
 
 // Stand-in for a signed prescription credential the customer already holds
 // locally (issued by their doctor's system at prescribing time). Only its
@@ -47,7 +48,7 @@ function Refill() {
 
 export function App() {
   return (
-    <MidnightZapProvider>
+    <MidnightZapProvider contracts={contracts} network="testnet">
       <Refill />
     </MidnightZapProvider>
   );

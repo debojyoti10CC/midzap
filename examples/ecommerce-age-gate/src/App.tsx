@@ -5,6 +5,7 @@
 
 import React, { useState } from "react";
 import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
+import { contracts } from "./midnight.js";
 
 // Stand-in for however this app already knows the user's birth year
 // (account profile, a previously-issued credential, etc). MidnightZap
@@ -43,7 +44,7 @@ function Checkout() {
 
 export function App() {
   return (
-    <MidnightZapProvider>
+    <MidnightZapProvider contracts={contracts} network="testnet">
       <Checkout />
     </MidnightZapProvider>
   );

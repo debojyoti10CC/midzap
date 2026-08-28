@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { MidnightZapClient } from "../core/client.js";
-import { MockProofBackend } from "../core/mockBackend.js";
-import type { ProofBackend } from "../core/types.js";
+import { LiveMidnightBackend } from "../core/liveBackend.js";
+import type { ContractBindings, ProofBackend } from "../core/types.js";
 
 interface MidnightZapContextValue {
   client: MidnightZapClient;
@@ -13,13 +13,29 @@ const MidnightZapContext = createContext<MidnightZapContextValue | null>(null);
 
 export interface MidnightZapProviderProps {
   /**
-   * Where proofs are produced. Defaults to an offline, deterministic
-   * `MockProofBackend`, so `<MidnightZapProvider>` with no props is a
-   * complete, working setup for local development and demos. Swap in
-   * `new LiveMidnightBackend(...)` for a real Midnight network — nothing
-   * below the provider changes.
+   * Where proofs are produced. Defaults to `LiveMidnightBackend` — real
+   * wallet, real Compact contracts, real Midnight proofs. Pass `contracts`
+   * (below) to point it at your deployed predicate contracts. Only override
+   * `backend` directly for tests (with `InMemoryProofBackend`) or a custom
+   * `ProofBackend`.
    */
   backend?: ProofBackend;
+  /**
+   * Deployed predicate contracts, keyed by predicate kind. Each entry is
+   * `{ address, load }` where `load` imports that circuit's `compactc`
+   * output:
+   *
+   *   contracts={{
+   *     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+   *   }}
+   *
+   * Ignored when `backend` is set. See docs/GO_LIVE.md.
+   */
+  contracts?: ContractBindings;
+  /** Passed to the default `LiveMidnightBackend`. Informational. */
+  network?: string;
+  /** Base URL the browser fetches compiled `managed/<circuit>/` zk-params from. */
+  zkAssetsBaseUrl?: string;
   /**
    * A stable, non-identifying id for the current user/session that your
    * app already has (a hashed account id, a session token, ...). If you
@@ -36,21 +52,31 @@ export interface MidnightZapProviderProps {
  *
  *   import { MidnightZapProvider } from "@midnightzap/sdk/react";
  *
- *   <MidnightZapProvider>
+ *   <MidnightZapProvider contracts={{
+ *     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+ *   }}>
  *     <App />
  *   </MidnightZapProvider>
  *
- * That's the whole setup. Add `backend={new LiveMidnightBackend(...)}`
- * when you're ready to run against a real Midnight network.
+ * Real proofs against Midnight. The one-time compile + deploy that
+ * produces those addresses is in docs/GO_LIVE.md.
  */
-export function MidnightZapProvider({ backend, subjectId, children }: MidnightZapProviderProps) {
+export function MidnightZapProvider({
+  backend,
+  contracts,
+  network,
+  zkAssetsBaseUrl,
+  subjectId,
+  children,
+}: MidnightZapProviderProps) {
   const value = useMemo<MidnightZapContextValue>(() => {
-    const resolvedBackend = backend ?? new MockProofBackend();
+    const resolvedBackend =
+      backend ?? new LiveMidnightBackend({ bindings: contracts, network, zkAssetsBaseUrl });
     return {
       client: new MidnightZapClient({ backend: resolvedBackend }),
       subjectId: subjectId ?? autoSubjectId(),
     };
-  }, [backend, subjectId]);
+  }, [backend, contracts, network, zkAssetsBaseUrl, subjectId]);
 
   return <MidnightZapContext.Provider value={value}>{children}</MidnightZapContext.Provider>;
 }

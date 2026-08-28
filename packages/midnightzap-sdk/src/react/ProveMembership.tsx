@@ -15,6 +15,12 @@ export interface ProveMembershipProps extends GatePresentationProps {
   subjectId?: string;
   /** Returns the caller's membership credential secret (never transmitted raw). May be async. */
   getMemberSecret: () => string | Promise<string>;
+  /**
+   * Live mode only: extra private witness material the circuit needs but
+   * the component doesn't model — e.g. `{ merklePath }` from your set
+   * operator's tree service. Merged into the private input, on-device.
+   */
+  getExtraWitness?: () => Record<string, unknown> | Promise<Record<string, unknown>>;
   onVerified?: (receipt: string) => void;
   /** Called when membership couldn't be proven, or the credential was already used for this action. */
   onRejected?: (reason: string) => void;
@@ -40,6 +46,7 @@ export function ProveMembership({
   actionTag,
   subjectId,
   getMemberSecret,
+  getExtraWitness,
   onVerified,
   onRejected,
   onError,
@@ -49,19 +56,19 @@ export function ProveMembership({
   const proof = useProof({ kind: "membership", set, actionTag });
 
   const trigger = useCallback(async () => {
-    let memberSecret: string;
+    let privateInput: Record<string, unknown>;
     try {
-      memberSecret = await getMemberSecret();
+      privateInput = { memberSecret: await getMemberSecret(), ...(await getExtraWitness?.()) };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       onError?.(message);
       return;
     }
-    const result = await proof.run(resolvedSubjectId, { memberSecret });
+    const result = await proof.run(resolvedSubjectId, privateInput);
     if (result.verified && result.receipt) onVerified?.(result.receipt);
     else if (result.status === "error" && result.error) onError?.(result.error);
     else if (result.error) onRejected?.(result.error);
-  }, [getMemberSecret, proof, resolvedSubjectId, onVerified, onRejected, onError]);
+  }, [getMemberSecret, getExtraWitness, proof, resolvedSubjectId, onVerified, onRejected, onError]);
 
   return (
     <GateShell

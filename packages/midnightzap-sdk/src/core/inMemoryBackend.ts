@@ -6,20 +6,17 @@ import type {
 } from "./types.js";
 
 /**
- * MockProofBackend
- * -----------------
- * A fully deterministic, in-memory stand-in for a live Midnight network
- * connection. It evaluates the SAME predicate logic the real Compact
- * circuits enforce (see /compact/*.compact), so the demo behaves honestly
- * — it just skips wallet connection, real proof generation, and on-chain
- * submission, so example apps run instantly with no testnet, faucet, or
- * wallet extension required.
+ * InMemoryProofBackend
+ * --------------------
+ * Evaluates the SAME accept/reject logic the real Compact circuits enforce
+ * (see /compact/*.compact), fully deterministically and with no network.
  *
- * Swap this for LiveMidnightBackend (see liveBackend.ts) to run against a
- * real Midnight network — the host app's code does not change, only the
- * backend passed into <MidnightZapProvider backend={...} />.
+ * This is a UNIT-TESTING utility, not a way to run the app. It does not
+ * produce zero-knowledge proofs and never touches Midnight. Assert your
+ * predicate wiring against it in tests; run the real app on
+ * `LiveMidnightBackend`, which is the `<MidnightZapProvider>` default.
  */
-export class MockProofBackend implements ProofBackend {
+export class InMemoryProofBackend implements ProofBackend {
   private nullifiers = new Set<string>();
   private artificialDelayMs: number;
 
@@ -122,3 +119,9 @@ export class MockProofBackend implements ProofBackend {
     return new Promise((r) => setTimeout(r, this.artificialDelayMs));
   }
 }
+
+/**
+ * @deprecated Renamed to `InMemoryProofBackend` to make its role clear —
+ * it is a test double, not a runnable backend. This alias will be removed.
+ */
+export const MockProofBackend = InMemoryProofBackend;

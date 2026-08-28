@@ -8,6 +8,7 @@
 
 import React, { useState } from "react";
 import { MidnightZapProvider, ProveMembership } from "@midnightzap/sdk/react";
+import { contracts } from "./midnight.js";
 
 // Stand-in for a credential this employee was already issued (e.g. at
 // onboarding) and holds locally — never uploaded to the forum.
@@ -67,7 +68,7 @@ function Forum() {
 
 export function App() {
   return (
-    <MidnightZapProvider>
+    <MidnightZapProvider contracts={contracts} network="testnet">
       <Forum />
     </MidnightZapProvider>
   );

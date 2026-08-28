@@ -17,6 +17,12 @@ export interface ProveCredentialValidProps extends GatePresentationProps {
    * that it lies in the future. May be async.
    */
   getExpiresAtUnix: () => number | Promise<number>;
+  /**
+   * Live mode only: extra private witness material the circuit needs but
+   * the component doesn't model — `{ issuerPublicKey, issuerSignature,
+   * credentialHash }` from the signed credential. Merged in on-device.
+   */
+  getExtraWitness?: () => Record<string, unknown> | Promise<Record<string, unknown>>;
   onVerified?: (receipt: string) => void;
   /** Called when the credential is expired or not from a trusted issuer. */
   onRejected?: (reason: string) => void;
@@ -39,6 +45,7 @@ export function ProveCredentialValid({
   issuer,
   subjectId,
   getExpiresAtUnix,
+  getExtraWitness,
   onVerified,
   onRejected,
   onError,
@@ -48,19 +55,19 @@ export function ProveCredentialValid({
   const proof = useProof({ kind: "credential-valid", issuer });
 
   const trigger = useCallback(async () => {
-    let expiresAtUnix: number;
+    let privateInput: Record<string, unknown>;
     try {
-      expiresAtUnix = await getExpiresAtUnix();
+      privateInput = { expiresAtUnix: await getExpiresAtUnix(), ...(await getExtraWitness?.()) };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       onError?.(message);
       return;
     }
-    const result = await proof.run(resolvedSubjectId, { expiresAtUnix });
+    const result = await proof.run(resolvedSubjectId, privateInput);
     if (result.verified && result.receipt) onVerified?.(result.receipt);
     else if (result.status === "error" && result.error) onError?.(result.error);
     else if (result.error) onRejected?.(result.error);
-  }, [getExpiresAtUnix, proof, resolvedSubjectId, onVerified, onRejected, onError]);
+  }, [getExpiresAtUnix, getExtraWitness, proof, resolvedSubjectId, onVerified, onRejected, onError]);
 
   return (
     <GateShell

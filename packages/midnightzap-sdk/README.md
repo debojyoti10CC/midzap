@@ -9,14 +9,16 @@ you're gating. That's the integration.
 npm install @midnightzap/sdk
 ```
 
-## 60-second integration
+## Integration
 
 ```tsx
 import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
 
 function App() {
   return (
-    <MidnightZapProvider>            {/* no props = offline mock backend */}
+    <MidnightZapProvider network="testnet" contracts={{
+      threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+    }}>
       <Checkout />
     </MidnightZapProvider>
   );
@@ -35,9 +37,13 @@ function Checkout() {
 }
 ```
 
-No `useState`, no wallet code, no circuit. The button appears once a
-zero-knowledge proof that `age ≥ 21` is verified. The birth year never
-leaves the browser.
+No `useState`, no wallet code, no circuit in your app. The button appears
+once a real zero-knowledge proof that `age ≥ 21` is verified on Midnight.
+The birth year never leaves the browser.
+
+The `contracts` addresses come from a one-time `compactc` compile + deploy —
+see [GO_LIVE.md](https://github.com/midnightzap/midnightzap/blob/main/docs/GO_LIVE.md).
+Also install the `@midnight-ntwrk/*` peer deps listed there.
 
 ## Three predicates
 
@@ -78,30 +84,45 @@ Or pass `unstyled` and target the stable hooks: `.midnightzap-prove-threshold`,
 (`idle` · `connecting-wallet` · `generating-proof` · `submitting` ·
 `verified` · `rejected` · `error`).
 
-## Going live on a real Midnight network
+## Backends
 
-```tsx
-import { LiveMidnightBackend } from "@midnightzap/sdk";
+`LiveMidnightBackend` is the default — the provider builds it from your
+`contracts` + `network`. It discovers the injected wallet, wires the
+midnight-js providers, loads your compiled circuit, seeds its private state
+on-device, calls it, and submits. Setup: **GO_LIVE.md**.
 
-<MidnightZapProvider backend={new LiveMidnightBackend({ network: "testnet" })}>
+`InMemoryProofBackend` evaluates the same accept/reject rules the circuits
+enforce, offline and deterministically. **Unit tests only** — pass it
+explicitly, never ship it:
+
+```ts
+import { MidnightZapClient, InMemoryProofBackend } from "@midnightzap/sdk";
+
+const client = new MidnightZapClient({ backend: new InMemoryProofBackend() });
+const { verified } = await client.prove(
+  { kind: "threshold", field: "age", threshold: 21 }, sessionId, { value: 25 },
+);
+// verified === true — asserts your predicate wiring, not a real proof
 ```
-
-Nothing below the provider changes. The default `MockProofBackend` runs the
-same accept/reject logic the Compact circuits enforce, entirely offline, so
-development and demos need no wallet, faucet, or deployed contract.
 
 ## Non-React usage
 
-```ts
-import { MidnightZapClient, MockProofBackend } from "@midnightzap/sdk";
+Drive `MidnightZapClient` directly with `LiveMidnightBackend`:
 
-const client = new MidnightZapClient({ backend: new MockProofBackend() });
-const result = await client.prove(
-  { kind: "threshold", field: "age", threshold: 21 },
-  sessionId,
-  { value: 25 },
+```ts
+import { MidnightZapClient, LiveMidnightBackend } from "@midnightzap/sdk";
+
+const client = new MidnightZapClient({
+  backend: new LiveMidnightBackend({
+    network: "testnet",
+    bindings: {
+      threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+    },
+  }),
+});
+const { verified, receipt } = await client.prove(
+  { kind: "threshold", field: "age", threshold: 21 }, sessionId, { value: 25 },
 );
-// result.verified === true
 ```
 
 MIT licensed. Part of the [MidnightZap](https://github.com/midnightzap/midnightzap) monorepo.

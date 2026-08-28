@@ -1,5 +1,11 @@
 # Demo video script (target: 1:50, hard cap 2:00)
 
+**Before recording:** complete `docs/GO_LIVE.md` (compile + deploy) so the
+demo shows real proofs on testnet. If you must record before that's done,
+run each example against the test backend for the click-through only —
+`<MidnightZapProvider backend={new InMemoryProofBackend()}>` — and say so
+on camera. Never present it as a real proof if it isn't.
+
 Required opening line per the hackathon rules — say this exactly, on camera,
 first:
 
@@ -42,13 +48,13 @@ first:
 ## 1:15–1:35 — Under the hood (screen: `/compact` folder + `liveBackend.ts`)
 
 - Briefly show the three `.compact` predicate templates.
-- Say: "Both integrations sit on the same three predicate templates — a
+- Say: "All three integrations sit on the same three predicate templates — a
   threshold check, a membership check with an anti-replay nullifier, and a
   credential-expiry check. Ship a new privacy feature by picking a
   predicate, not writing a circuit."
-- Flash the mock-vs-live backend swap (one line: `MockProofBackend` →
-  `LiveMidnightBackend`) to show the path to a real Midnight network
-  deployment.
+- Show `src/core/liveBackend.ts` + a `src/midnight.ts`: "The default backend
+  is the real one — it discovers the wallet, loads the compiled circuit,
+  and submits a real proof. You point it at three deployed addresses once."
 
 ## 1:35–1:50 — Close (screen: README / architecture)
 

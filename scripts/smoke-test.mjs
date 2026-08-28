@@ -1,7 +1,7 @@
-// Headless sanity check for the MockProofBackend: proves the exact logic
+// Headless sanity check for the InMemoryProofBackend: proves the exact logic
 // that the Compact circuits in /compact enforce actually behaves right,
 // independent of any UI. Run with: node scripts/smoke-test.mjs
-import { MidnightZapClient, MockProofBackend } from "../packages/midnightzap-sdk/dist/index.js";
+import { MidnightZapClient, InMemoryProofBackend } from "../packages/midnightzap-sdk/dist/index.js";
 
 let failures = 0;
 function check(name, cond) {
@@ -16,7 +16,7 @@ function check(name, cond) {
 async function main() {
   console.log("threshold predicate (age >= 21):");
   {
-    const client = new MidnightZapClient({ backend: new MockProofBackend({ artificialDelayMs: 0 }) });
+    const client = new MidnightZapClient({ backend: new InMemoryProofBackend({ artificialDelayMs: 0 }) });
     const adult = await client.prove(
       { kind: "threshold", field: "age", threshold: 21 },
       "subject-a",
@@ -44,7 +44,7 @@ async function main() {
 
   console.log("membership predicate (anti-replay nullifier):");
   {
-    const client = new MidnightZapClient({ backend: new MockProofBackend({ artificialDelayMs: 0 }) });
+    const client = new MidnightZapClient({ backend: new InMemoryProofBackend({ artificialDelayMs: 0 }) });
     const first = await client.prove(
       { kind: "membership", set: "verified-employees", actionTag: "post-access" },
       "subject-c",
@@ -69,7 +69,7 @@ async function main() {
 
   console.log("credential-valid predicate (expiry):");
   {
-    const client = new MidnightZapClient({ backend: new MockProofBackend({ artificialDelayMs: 0 }) });
+    const client = new MidnightZapClient({ backend: new InMemoryProofBackend({ artificialDelayMs: 0 }) });
     const future = Math.floor(Date.now() / 1000) + 3600;
     const past = Math.floor(Date.now() / 1000) - 3600;
 

@@ -8,7 +8,7 @@ It does that with three layers.
 ┌──────────────────────────────────────────────────────────────────────┐
 │ HOST APP  (existing web2 React app — unchanged except the gate)       │
 │                                                                      │
-│   <MidnightZapProvider>                        {/* mock by default */}│
+│   <MidnightZapProvider contracts={{…}}>       {/* Live by default */}│
 │     ...                                                              │
 │     <ProveThreshold field="age" threshold={21}                       │
 │       getPrivateValue={() => year - user.birthYear}>                  │
@@ -23,23 +23,22 @@ It does that with three layers.
 │   ProveThreshold · ProveMembership · ProveCredentialValid            │
 │   → predicate wiring only; share GateShell for the styled default    │
 │   UI (trigger · progress · badge · retry · gated children · render)  │
-│   MidnightZapProvider (mock by default) · useProof() · VerifiedBadge │
+│   MidnightZapProvider (Live by default) · useProof() · VerifiedBadge │
 ├──────────────────────────────────────────────────────────────────────┤
 │ SDK — core  (packages/midnightzap-sdk/src/core)                      │
 │   MidnightZapClient.prove(predicate, subjectId, privateInput)        │
 │   Predicate = threshold | membership | credential-valid              │
 └───────────────┬──────────────────────────────────────────────────────┘
-                │  ProofBackend interface — one seam, two implementations
+                │  ProofBackend interface — one seam
         ┌───────┴────────────────────────┐
         ▼                                ▼
 ┌───────────────────────┐   ┌──────────────────────────────────────────┐
-│ MockProofBackend      │   │ LiveMidnightBackend                      │
-│ deterministic, in-mem │   │ wallet connect + Compact contract calls  │
-│ evaluates the SAME    │   │ against a deployed predicate contract    │
-│ logic the circuits do │   │ (connect done; call surface: 2 CONFIRMs) │
-│ → demos run offline   │   │                                          │
-└───────────────────────┘   └───────────────┬──────────────────────────┘
-                                            ▼
+│ LiveMidnightBackend   │   │ InMemoryProofBackend                     │
+│ (DEFAULT)             │   │ same accept/reject logic, no network     │
+│ wallet + providers +  │   │ UNIT TESTS ONLY — not a proof, not a     │
+│ compiled circuit call │   │ way to run the app                       │
+│ + submit → tx id      │   └──────────────────────────────────────────┘
+└───────────┬───────────┘
                             ┌──────────────────────────────────────────┐
                             │ COMPACT PREDICATE TEMPLATES  (/compact)   │
                             │  threshold_proof.compact                  │
@@ -59,19 +58,26 @@ interface ProofBackend {
 }
 ```
 
-Everything above this interface — every component, every host-app line —
-is identical whether you run mocked or live. Going to a real Midnight
-network is one line:
+Everything above this interface — every component, every host-app line — is
+identical regardless of backend. The default is `LiveMidnightBackend`,
+configured from the provider's `contracts` prop:
 
-```diff
-- <MidnightZapProvider backend={new MockProofBackend()}>
-+ <MidnightZapProvider backend={new LiveMidnightBackend({ network: "testnet" })}>
+```tsx
+<MidnightZapProvider network="testnet" contracts={{
+  threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+}}>
 ```
 
-`MockProofBackend` is not a fake: it runs the exact accept/reject logic the
-Compact circuits enforce (threshold comparison, nullifier double-spend
-check, expiry comparison), so a demo on a plane behaves the same as a demo
-on testnet — it just skips proof generation and on-chain submission.
+`LiveMidnightBackend.requestProof` does: discover wallet → build midnight-js
+providers (proof server, indexer, private-state, zk-config) → load the
+compiled circuit → seed its private state from the component's getter,
+on-device → `findDeployedContract` → call the circuit (proof generated
+client-side) → submit → return the tx id as the receipt.
+
+`InMemoryProofBackend` runs only the accept/reject logic (threshold compare,
+nullifier double-spend check, expiry compare) for unit tests. It is not a
+proof and not a way to run the app — pass it explicitly as `backend` in a
+test, never in shipped code.
 
 ## Why predicates instead of circuits
 

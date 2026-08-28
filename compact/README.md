@@ -25,23 +25,20 @@ Each compile emits the prover key, verifier key, and the contract ABI.
 ## Deploy and wire into the live backend
 
 Deploy each compiled contract with your usual Midnight deploy flow, then
-hand the addresses to `LiveMidnightBackend`:
+hand the addresses to `<MidnightZapProvider>`:
 
-```ts
-import { LiveMidnightBackend } from "@midnightzap/sdk";
-
-const backend = new LiveMidnightBackend({
-  network: "testnet",
-  contracts: {
-    threshold:          { address: "0x…", circuit: "proveThreshold" },
-    membership:         { address: "0x…", circuit: "proveMembership" },
-    "credential-valid": { address: "0x…", circuit: "proveCredentialValid" },
-  },
-});
+```tsx
+<MidnightZapProvider network="testnet" contracts={{
+  threshold:          { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+  membership:         { address: "0x…", load: () => import("./managed/membership/contract/index.cjs") },
+  "credential-valid": { address: "0x…", load: () => import("./managed/expiry/contract/index.cjs") },
+}}>
 ```
 
-Nothing in a host app changes — only the `backend` prop on
-`<MidnightZapProvider>`.
+The circuit entrypoint names (`proveThreshold`, `proveMembership`,
+`proveCredentialValid`) and witness maps are baked into the SDK — you only
+supply the address and the compiled-module `load`. Full walkthrough:
+`docs/GO_LIVE.md`.
 
 ## Status
 

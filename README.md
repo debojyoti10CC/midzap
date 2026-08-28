@@ -49,6 +49,8 @@ examples/forum-anon-login/      BEFORE/AFTER: real-name login → anonymous veri
 examples/pharmacy-refill/       BEFORE/AFTER: prescription photo upload → ZK "credential valid" proof
 scripts/smoke-test.mjs          Headless test proving the predicate logic is correct
 scripts/gen-diffs.mjs           Regenerates the docs/*.diff.txt files from example source
+scripts/deploy.mjs              One-time deploy of the three predicate contracts
+docs/GO_LIVE.md                 The one-time compile + deploy that makes proofs real
 docs/ARCHITECTURE.md            The three layers and the one seam (ProofBackend)
 docs/DEMO_SCRIPT.md             Paced ~1:50 script for the demo video
 docs/ecommerce.diff.txt         Literal unified diff for the checkout integration
@@ -75,50 +77,58 @@ post-mainnet and exact signatures can shift between releases.
 
 ### The SDK (`packages/midnightzap-sdk`)
 
-Two backends, one interface (`ProofBackend`) — this seam is the whole design
-(see `docs/ARCHITECTURE.md`):
+One interface (`ProofBackend`), and `LiveMidnightBackend` is the default —
+real wallet, real Compact contracts, real Midnight proofs (see
+`docs/ARCHITECTURE.md`):
 
-- **`MockProofBackend`** — deterministic, in-memory, zero network calls.
-  Evaluates the *same logic* the Compact circuits enforce, so the demo
-  behaves honestly, but needs no testnet, faucet, or wallet extension. This
-  is what every example app uses, so they run instantly anywhere.
-- **`LiveMidnightBackend`** — the real adapter against
-  `@midnight-ntwrk/wallet-api`, `@midnight-ntwrk/dapp-connector-api`, and
-  `@midnight-ntwrk/midnight-js-contracts`. Wallet discovery + connection
-  (the injected `window.midnight` connector), the status lifecycle, and the
-  per-predicate witness assembly are implemented; the two remaining
-  `// CONFIRM:` markers in `src/core/liveBackend.ts` are the contract-call
-  surface, which needs pinning to your installed SDK version and a deployed
-  contract address (pass `new LiveMidnightBackend({ contracts: {…} })` — see
-  `compact/README.md`). Until then it returns a precise error instead of
-  faking a proof. Swapping it in is a one-line change:
-  `<MidnightZapProvider backend={new LiveMidnightBackend({ network: "testnet" })}>`
-  — nothing else in a host app changes.
+- **`LiveMidnightBackend`** *(default)* — discovers the injected
+  `window.midnight` wallet, builds the midnight-js providers (proof server,
+  indexer, private-state, zk-config), loads your `compactc` output, seeds
+  the circuit's private state on-device, calls the circuit, submits, and
+  returns the tx id. Point it at your deployed contracts with
+  `<MidnightZapProvider contracts={{ … }}>`. The `@midnight-ntwrk/*` stack
+  is an optional peer dependency, loaded lazily. Full setup:
+  **`docs/GO_LIVE.md`**.
+- **`InMemoryProofBackend`** — evaluates the same accept/reject logic the
+  circuits enforce, deterministically and offline. **Unit tests only** —
+  pass it explicitly as `backend`. It does not produce proofs and is not a
+  way to run the app.
 
 ## Quickstart
 
 ```bash
 npm install
-npm run verify            # build SDK + typecheck all workspaces + predicate smoke test
+npm run verify           # build SDK + typecheck every workspace + predicate logic test
 
-npm run dev:ecommerce     # http://localhost:5173 — age-gated checkout demo
-npm run dev:forum         # http://localhost:5174 — anonymous verified forum demo
-npm run dev:pharmacy      # http://localhost:5175 — private "prescription still valid" demo
+npm run dev:ecommerce    # http://localhost:5173 — age-gate checkout
+npm run dev:forum        # http://localhost:5174 — anonymous verified forum
+npm run dev:pharmacy     # http://localhost:5175 — private "prescription still valid"
 ```
 
-Other scripts: `npm run build` (SDK + all examples), `npm test` (smoke test
-only), `npm run gen:diffs` (regenerate the diff docs from example source).
-CI runs the same steps on every push — `.github/workflows/ci.yml`.
+The example apps render immediately, but a proof needs the one-time
+**`docs/GO_LIVE.md`** setup (compile the circuits with `compactc`, deploy
+once, paste the addresses into each `src/midnight.ts`). Until then the
+trigger button returns a clear "no deployed contract" error — never a fake
+success.
+
+Other scripts: `npm run build` (SDK + all examples), `npm test` (predicate
+logic test), `npm run gen:diffs` (regenerate the diff docs). CI runs the
+same on every push — `.github/workflows/ci.yml`.
 
 ## Add MidnightZap to your own app
 
-1. `npm install @midnightzap/sdk` (workspace-local in this repo).
-2. Wrap the subtree that needs a gate, once — no props needed, it defaults
-   to an offline mock backend:
+Full version in `docs/GO_LIVE.md`; the shape:
+
+1. `npm install @midnightzap/sdk` plus the `@midnight-ntwrk/*` peer deps.
+2. Wrap the subtree that needs a gate, once, pointing at your deployed
+   contracts (the addresses come from the one-time deploy in
+   `docs/GO_LIVE.md`):
    ```tsx
    import { MidnightZapProvider } from "@midnightzap/sdk/react";
 
-   <MidnightZapProvider>
+   <MidnightZapProvider network="testnet" contracts={{
+     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+   }}>
      <App />
    </MidnightZapProvider>
    ```
@@ -126,22 +136,15 @@ CI runs the same steps on every push — `.github/workflows/ci.yml`.
    getter for the private value. The child is revealed once the proof
    verifies — no `useState` to wire:
    ```tsx
-   <ProveCredentialValid
-     issuer="pharmacy-board"
-     getExpiresAtUnix={() => localCredentialStore.get("rx").expiresAt}
-   >
-     <RefillButton />
-   </ProveCredentialValid>
+   <ProveThreshold field="age" threshold={21}
+     getPrivateValue={() => new Date().getFullYear() - user.birthYear}>
+     <CheckoutButton />
+   </ProveThreshold>
    ```
    Prefer callbacks or custom UI? Use `onVerified` / `onRejected` /
    `onError`, the `render={(state) => …}` prop, or the `useProof(predicate)`
-   hook directly. Theme every component with CSS variables
-   (`--mz-accent`, `--mz-radius`, …) or pass `unstyled`.
-4. When you're ready for a real network: compile the matching
-   `compact/*.compact` template, deploy it, fill in
-   `src/core/liveBackend.ts`, and pass
-   `backend={new LiveMidnightBackend({ network: "testnet" })}` to the
-   provider. Nothing below it changes.
+   hook directly. Theme with CSS variables (`--mz-accent`, `--mz-radius`, …)
+   or pass `unstyled`.
 
 The package-level [`packages/midnightzap-sdk/README.md`](packages/midnightzap-sdk/README.md)
 has the full component/prop reference.
@@ -171,8 +174,8 @@ from the example source.
 
 - **Technology** — a real abstraction layer over three distinct ZK circuit
   shapes (threshold / membership+nullifier / issuer-signature+expiry), a
-  pluggable backend so the same component tree runs mocked or live, and
-  three working integrations, not one.
+  pluggable backend (`LiveMidnightBackend` by default; a same-logic
+  in-memory backend for unit tests), and three working integrations, not one.
 - **Originality** — Midnight's hackathon history so far is mostly one-off
   identity/compliance apps; this is developer infrastructure that makes the
   *next* fifty of those apps cheaper to build.
@@ -188,14 +191,17 @@ from the example source.
 
 ## Honesty notes
 
-- `LiveMidnightBackend` implements wallet discovery/connection and witness
-  assembly, but the contract-call surface (2 `// CONFIRM:` markers) still
-  needs pinning to a specific `@midnight-ntwrk/*` version and a deployed
-  contract address — neither exists in a clean checkout. It errors clearly
-  rather than faking that step.
-- The `.compact` files are real Compact syntax based on official docs, not
-  fabricated pseudocode, but have not been run through the `compact`
-  compiler in this environment — compile-check them before you deploy.
-- `MockProofBackend` runs the circuits' accept/reject *logic*, not real
-  proof generation. It exists so demos are reproducible offline, not to
-  stand in for a security audit.
+- `LiveMidnightBackend` is the real path: wallet discovery, provider
+  wiring, on-device private-state seeding, circuit call, submit. It runs
+  once you complete `docs/GO_LIVE.md` (compile + deploy). Two spots depend
+  on your environment: the exact `@midnight-ntwrk/*` versions (field names
+  on `serviceUriConfig()` / `wallet.state()` have drifted across releases)
+  and the deployed contract addresses.
+- The `.compact` files are real Compact syntax based on official docs but
+  have **not** been run through `compactc` here — expect to fix stdlib
+  signatures on the first compile.
+- The checked-in `examples/**/managed/**/index.cjs` files are build
+  placeholders that *throw* if invoked. `compactc` overwrites them. They
+  are not proof mocks.
+- `InMemoryProofBackend` runs the circuits' accept/reject *logic* for unit
+  tests. It is not proof generation and not a way to run the app.
