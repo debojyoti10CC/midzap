@@ -11,6 +11,7 @@
     "build:sdk": "npm run build --workspace=@midnightzap/sdk",
     "build:examples": "npm run build --workspace=ecommerce-age-gate && npm run build --workspace=forum-anon-login && npm run build --workspace=pharmacy-refill",
     "build": "npm run build:sdk && npm run build:examples",
+    "dev": "npm run dev --workspace=ecommerce-age-gate",
     "dev:ecommerce": "npm run dev --workspace=ecommerce-age-gate",
     "dev:forum": "npm run dev --workspace=forum-anon-login",
     "dev:pharmacy": "npm run dev --workspace=pharmacy-refill",
