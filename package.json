@@ -1,0 +1,23 @@
+{
+  "name": "midnightzap",
+  "private": true,
+  "version": "0.1.0",
+  "description": "MidnightZap — drop-in privacy SDK that lets any existing web2 app add Midnight-powered zero-knowledge verification in minutes, not months.",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build:sdk": "npm run build --workspace=@midnightzap/sdk",
+    "build": "npm run build:sdk && npm run build --workspace=ecommerce-age-gate && npm run build --workspace=forum-anon-login",
+    "dev:ecommerce": "npm run dev --workspace=ecommerce-age-gate",
+    "dev:forum": "npm run dev --workspace=forum-anon-login",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run build:sdk && node scripts/smoke-test.mjs",
+    "gen:diffs": "node scripts/gen-diffs.mjs",
+    "verify": "npm run build:sdk && npm run typecheck && node scripts/smoke-test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

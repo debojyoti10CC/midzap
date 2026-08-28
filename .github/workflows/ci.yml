@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build SDK
+        run: npm run build:sdk
+
+      - name: Typecheck (SDK + both example integrations)
+        run: npm run typecheck
+
+      - name: Predicate smoke test
+        run: node scripts/smoke-test.mjs
+
+      - name: Build example integrations
+        run: |
+          npm run build --workspace=ecommerce-age-gate
+          npm run build --workspace=forum-anon-login
+
+      - name: Diffs are in sync with example source
+        run: |
+          node scripts/gen-diffs.mjs
+          git diff --exit-code -- docs/ecommerce.diff.txt docs/forum.diff.txt

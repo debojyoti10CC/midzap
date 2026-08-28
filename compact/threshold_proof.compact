@@ -1,0 +1,45 @@
+// threshold_proof.compact
+//
+// MidnightZap template: THRESHOLD PROOF
+// -------------------------------------
+// Proves that a private numeric value (age, income, credit score, account
+// balance, etc.) meets or exceeds a public threshold — without ever
+// revealing the value itself to the counterparty or putting it on-chain.
+//
+// Typical MidnightZap usage: <ProveThreshold predicate="age>=21" />,
+// <ProveThreshold predicate="income>=45000" />
+//
+// NOTE: written against the Compact syntax documented at
+// docs.midnight.network (language_version 0.23, bulletin-board example).
+// Verify against your installed `compact` compiler before deploying —
+// Compact is a young, fast-moving language and exact stdlib signatures
+// (persistentHash, disclose, etc.) may shift between releases.
+
+pragma language_version 0.23;
+import CompactStandardLibrary;
+
+// Public ledger state: one boolean per subject commitment, set true once
+// that subject has produced a valid proof for this threshold circuit.
+// We never store the private value or the subject's real-world identity —
+// only a hash commitment ("subjectId") the calling app already uses to
+// track its own users (e.g. a wallet address hash or session id).
+export ledger verified: Map<Bytes<32>, Boolean>;
+
+// The private value lives only in the caller's wallet/device. It never
+// leaves the device unproven — the circuit consumes it locally to build
+// the proof, then the circuit throws it away.
+witness privateValue(): Uint<64>;
+
+// threshold and subjectId are public circuit *arguments* — the app decides
+// what threshold to check ("21", "45000", ...) and which subject
+// commitment to mark as verified. The private value never appears in
+// either the call nor the resulting transaction.
+export circuit proveThreshold(subjectId: Bytes<32>, threshold: Uint<64>): [] {
+  value = privateValue();
+  assert(value >= threshold, "Value does not meet required threshold");
+  verified.insert(disclose(subjectId), true);
+}
+
+export circuit isVerified(subjectId: Bytes<32>): Boolean {
+  return verified.member(subjectId) ? verified.lookup(subjectId) : false;
+}
