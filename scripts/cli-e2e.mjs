@@ -38,18 +38,18 @@ try {
     "vite.config.ts patched for the Midnight runtime"
   );
 
-  run("npm", ["run", "typecheck", "--workspace=plain-shop"]);
-  run("npm", ["run", "build", "--workspace=plain-shop"]);
+  run("npm", ["run", "typecheck", "--workspace=plain-shop"], true);
+  run("npm", ["run", "build", "--workspace=plain-shop"], true);
   console.log("\n✓ CLI e2e: plain-shop converts, typechecks, and builds.");
 } finally {
   if (dirty) {
-    execFileSync("git", ["checkout", "--", "examples/plain-shop"], { cwd: root, shell: sh });
-    execFileSync("git", ["clean", "-fdq", "examples/plain-shop"], { cwd: root, shell: sh });
+    execFileSync("git", ["checkout", "--", "examples/plain-shop"], { cwd: root });
+    execFileSync("git", ["clean", "-fdq", "examples/plain-shop"], { cwd: root });
   }
 }
 
-function run(cmd, args) {
-  execFileSync(cmd, args, { cwd: root, stdio: "inherit", shell: sh });
+function run(cmd, args, needShell = false) {
+  execFileSync(cmd, args, { cwd: root, stdio: "inherit", shell: needShell && sh });
 }
 function ok(cond, msg) {
   if (!cond) fail(msg);

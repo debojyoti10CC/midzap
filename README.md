@@ -1,63 +1,84 @@
 # MidnightZap
 
-**Add real, Midnight-powered zero-knowledge privacy to an existing web2 app in minutes — not months.**
+**Turn an existing web2 app into a Midnight zero-knowledge privacy app — one command.**
 
-MidnightZap is what a StarkZap-style "money toolkit" looks like when the thing
-you're plugging into any app isn't payments, it's privacy. Instead of asking a
-developer to learn Compact and write a ZK circuit, MidnightZap ships a small
-library of pre-built, pre-written privacy **predicates** — "is this value
-above a threshold," "is this caller a member of this private set," "is this
-credential still valid" — as drop-in React components and a framework-agnostic
-client. Point a component at a predicate, hand it a getter for the private
-value, and you have a working zero-knowledge gate.
+```bash
+npx @midnightzap/cli add age-gate ./my-shop
+```
+
+That finds the self-reported control gating an action — an "I am 21+"
+checkbox, a licence upload, a real-name login — rewrites it as a
+zero-knowledge predicate, wraps your app in a provider, drops in a
+compiled Compact circuit, and patches your build. `--dry-run` shows the
+whole thing as a diff first.
+
+Under the CLI is **`@midnightzap/sdk`**: pre-written, pre-compiled privacy
+**predicates** — "is this value above a threshold", "is this caller in a
+private set", "is this credential still valid" — as drop-in React
+components. No Compact, no circuit, no wallet plumbing in your app.
 
 ```tsx
-<ProveThreshold
-  field="age"
-  threshold={21}
-  getPrivateValue={() => currentYear - user.birthYear}
->
+<ProveThreshold field="age" threshold={21}
+  getPrivateValue={() => currentYear - user.birthYear}>
   <button>Complete purchase</button>   {/* revealed only after the proof verifies */}
 </ProveThreshold>
 ```
 
-No document upload. No ID scan. No `useState`, no wallet code. The app
-never sees the birth year — only a cryptographic proof that the threshold
-was met.
+The app never sees the birth year — only a cryptographic proof that the
+threshold was met.
 
-Everything in this repo builds, typechecks, and passes its predicate tests:
+Everything here builds, typechecks, and passes — including an end-to-end
+test that runs the CLI on a plain web2 app and compiles the result:
 `npm install && npm run verify`.
 
 ## Why this, and why now
 
-Midnight hit mainnet this year with programmable privacy and Compact as its
-smart-contract language, but almost every example app built on it so far is a
-one-off — one team building one identity app, one team building one
-compliance app. Meanwhile the actual bottleneck for adoption is the same one
-every new chain hits: integrating with an *existing* product is expensive
-enough that most teams don't bother. MidnightZap is infrastructure, not an
-app — it's the thing that makes "add privacy to my existing app" a component
-swap instead of a research project.
+Midnight hit mainnet this year with Compact as its smart-contract language,
+but the bottleneck for adoption is the same one every new chain hits:
+integrating with an *existing* product is expensive enough that most teams
+don't bother. MidnightZap is infrastructure — the CLI makes "add privacy to
+my app" a `git diff` you review, not a research project.
+
+## Why this, and why now
+
+## The CLI
+
+```bash
+npx @midnightzap/cli add <recipe> [dir]   # age-gate | anon-login | credential-check
+npx @midnightzap/cli list
+npx @midnightzap/cli doctor [dir]
+  --dry-run   print the diff, write nothing
+```
+
+`add` touches six things: the gated component (→ `<Prove…>`), the app root
+(→ `<MidnightZapProvider>`), a new `src/midnight.ts` binding, a copied-in
+compiled circuit, `vite.config.*` (marks the Midnight WASM runtime
+external), and `package.json`. Try it on the bundled demo target:
+
+```bash
+npx @midnightzap/cli add age-gate examples/plain-shop --dry-run
+```
+
+Full reference: [`packages/midnightzap-cli/README.md`](packages/midnightzap-cli/README.md).
 
 ## What's in this repo
 
 ```
-compact/                        Three Compact circuit templates (see below)
+packages/midnightzap-cli/       The CLI: text-level codemods (age-gate / anon-login / credential-check)
 packages/midnightzap-sdk/       The SDK: framework-agnostic core + React layer
-examples/ecommerce-age-gate/    BEFORE/AFTER: web2 checkbox age-gate → real ZK proof
-examples/forum-anon-login/      BEFORE/AFTER: real-name login → anonymous verified posting
-examples/pharmacy-refill/       BEFORE/AFTER: prescription photo upload → ZK "credential valid" proof
-compact/NOTES.md                First-compile fix list for the templates
-scripts/smoke-test.mjs          Headless test proving the predicate logic is correct
-scripts/gen-diffs.mjs           Regenerates the docs/*.diff.txt files from example source
-scripts/sync-managed.mjs        Copies compiled circuits into each example's public/
+compact/                        Three Compact circuit templates + NOTES.md (compile fixes)
+examples/plain-shop/            A pristine web2 checkout — the CLI's "before"
+examples/ecommerce-age-gate/    BEFORE/AFTER: checkbox age-gate → ProveThreshold
+examples/forum-anon-login/      BEFORE/AFTER: real-name login → ProveMembership
+examples/pharmacy-refill/       BEFORE/AFTER: prescription upload → ProveCredentialValid
+scripts/cli-e2e.mjs             Runs the CLI on plain-shop, builds the result, restores it
+scripts/smoke-test.mjs          Headless test of the predicate accept/reject logic
+scripts/gen-diffs.mjs           Regenerates docs/*.diff.txt from example source
 scripts/deploy.mjs              One-time deploy of the three predicate contracts
 docs/GO_LIVE.md                 The one-time compile + deploy that makes proofs real
-docs/ARCHITECTURE.md            The three layers and the one seam (ProofBackend)
-docs/DEMO_SCRIPT.md             Paced ~1:50 script for the demo video
-docs/ecommerce.diff.txt         Literal unified diff for the checkout integration
-docs/forum.diff.txt             Literal unified diff for the forum integration
-docs/pharmacy.diff.txt          Literal unified diff for the pharmacy integration
+docs/ARCHITECTURE.md            The layers and the one seam (ProofBackend)
+docs/DEMO_SCRIPT.md             Paced ~1:50 demo-video script
+docs/*.diff.txt                 Literal unified diffs for the three integrations
 ```
 
 One example per predicate — `<ProveThreshold>`, `<ProveMembership>`,
@@ -176,22 +197,21 @@ from the example source.
 
 ## Judging criteria, mapped
 
-- **Technology** — a real abstraction layer over three distinct ZK circuit
-  shapes (threshold / membership+nullifier / issuer-signature+expiry), a
-  pluggable backend (`LiveMidnightBackend` by default; a same-logic
-  in-memory backend for unit tests), and three working integrations, not one.
-- **Originality** — Midnight's hackathon history so far is mostly one-off
-  identity/compliance apps; this is developer infrastructure that makes the
-  *next* fifty of those apps cheaper to build.
-- **Execution** — SDK and all three examples build, typecheck, and pass a
-  headless end-to-end check of every predicate; CI enforces all of it.
-- **Completion** — deliberately scoped to 3 predicate templates + 3 React
-  components + 3 one-per-predicate integrations rather than one sprawling app.
-- **Documentation** — this README, `docs/ARCHITECTURE.md`, and two literal
-  unified diffs *are* the product story.
-- **Business value** — dev tooling is the highest-leverage thing to build in
-  a young ecosystem; "add privacy to your existing app in an afternoon" is a
-  sellable product on its own.
+- **Technology** — a codemod CLI over an SDK over three real, `compact`-0.34
+  compiled circuits; a pluggable backend (`LiveMidnightBackend` by default);
+  three worked integrations plus the CLI conversion, all tested.
+- **Originality** — Midnight's hackathon history is one-off identity apps.
+  This is the tooling layer: `npx @midnightzap/cli add age-gate` turns
+  "integrate Midnight" into a reviewable diff.
+- **Execution** — `npm run verify` builds the SDK + CLI, typechecks 6
+  workspaces, runs the predicate logic test, and runs a **CLI end-to-end
+  test** that converts a plain web2 app and compiles the output.
+- **Completion** — 3 compiled circuits + 3 React components + 3 CLI recipes
+  + 3 before/after integrations + a plain "before" target, all wired.
+- **Documentation** — this README, `packages/*/README.md`,
+  `docs/ARCHITECTURE.md`, `docs/GO_LIVE.md`, and three literal unified diffs.
+- **Business value** — "add privacy to your existing app with one command"
+  is the highest-leverage thing to ship in a young ecosystem.
 
 ## Honesty notes
 
