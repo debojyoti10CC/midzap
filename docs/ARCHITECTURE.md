@@ -8,11 +8,12 @@ It does that with three layers.
 ┌──────────────────────────────────────────────────────────────────────┐
 │ HOST APP  (existing web2 React app — unchanged except the gate)       │
 │                                                                      │
-│   <MidnightZapProvider backend={backend}>                            │
+│   <MidnightZapProvider>                        {/* mock by default */}│
 │     ...                                                              │
 │     <ProveThreshold field="age" threshold={21}                       │
-│       getPrivateValue={() => year - user.birthYear}                  │
-│       onVerified={() => unlock()} />                                 │
+│       getPrivateValue={() => year - user.birthYear}>                  │
+│       <CompletePurchaseButton />              {/* gated content */}   │
+│     </ProveThreshold>                                                │
 │   </MidnightZapProvider>                                             │
 └───────────────┬──────────────────────────────────────────────────────┘
                 │  picks a predicate + supplies a getter for private data
@@ -20,7 +21,9 @@ It does that with three layers.
 ┌──────────────────────────────────────────────────────────────────────┐
 │ SDK — React layer  (packages/midnightzap-sdk/src/react)              │
 │   ProveThreshold · ProveMembership · ProveCredentialValid            │
-│   VerifiedBadge · useProof()   → all thin wrappers over ...          │
+│   → predicate wiring only; share GateShell for the styled default    │
+│   UI (trigger · progress · badge · retry · gated children · render)  │
+│   MidnightZapProvider (mock by default) · useProof() · VerifiedBadge │
 ├──────────────────────────────────────────────────────────────────────┤
 │ SDK — core  (packages/midnightzap-sdk/src/core)                      │
 │   MidnightZapClient.prove(predicate, subjectId, privateInput)        │

@@ -1,6 +1,6 @@
 --- examples/forum-anon-login/src/App.before.tsx	2026-08-28 22:41:19.943635300 +0530
-+++ examples/forum-anon-login/src/App.tsx	2026-08-28 22:41:26.222101700 +0530
-@@ -1,32 +1,46 @@
++++ examples/forum-anon-login/src/App.tsx	2026-08-28 22:51:48.528173800 +0530
+@@ -1,60 +1,74 @@
 -// BEFORE — a plain internal feedback forum. You log in with your real
 -// company account, so every "candid" post is tied to your real name
 -// forever, which defeats the point. Not wired into the Vite build; it's
@@ -9,17 +9,12 @@
 +// still proves you're a real, current employee (no outsider spam), but the
 +// proof reveals only that fact, never which employee; a per-action
 +// nullifier stops one credential faking multiple "anonymous" posters.
-+// The whole integration: swap real-name login for <ProveMembership>, wrap
-+// the tree in <MidnightZapProvider>, drop `author` from posts. Literal
-+// unified diff: docs/forum.diff.txt.
++// The whole integration: wrap the tree in <MidnightZapProvider> and put
++// the composer inside <ProveMembership>; drop `author` from posts.
++// Literal unified diff: docs/forum.diff.txt.
  
  import React, { useState } from "react";
 +import { MidnightZapProvider, ProveMembership } from "@midnightzap/sdk/react";
-+import { MockProofBackend } from "@midnightzap/sdk";
-+
-+// In production, swap MockProofBackend for LiveMidnightBackend — see
-+// packages/midnightzap-sdk/src/core/liveBackend.ts. Nothing below changes.
-+const backend = new MockProofBackend();
 +
 +// Stand-in for a credential this employee was already issued (e.g. at
 +// onboarding) and holds locally — never uploaded to the forum.
@@ -35,7 +30,6 @@
 -export function App() {
 -  const [loggedIn, setLoggedIn] = useState(false);
 +function Forum() {
-+  const [verified, setVerified] = useState(false);
    const [draft, setDraft] = useState("");
    const [posts, setPosts] = useState<Post[]>([
 -    { author: "Priya Nair", body: "Can we revisit the return-to-office policy?" },
@@ -50,33 +44,49 @@
 -          <button onClick={() => setLoggedIn(true)}>
 -            Log in as {currentEmployee.name} ({currentEmployee.email})
 -          </button>
-+        {!verified ? (
-+          <ProveMembership
-+            set="verified-employees"
-+            actionTag="post-access"
-+            subjectId="demo-session-1"
-+            getMemberSecret={() => localCredentialStore.employeeCred}
-+            onVerified={() => setVerified(true)}
-+          />
-         ) : (
-           <>
-             <textarea
-@@ -37,12 +51,12 @@
-             <div style={{ marginTop: 10 }}>
-               <button
-                 onClick={() => {
+-        ) : (
+-          <>
+-            <textarea
+-              value={draft}
+-              onChange={(e) => setDraft(e.target.value)}
+-              placeholder="Share honest feedback..."
+-            />
+-            <div style={{ marginTop: 10 }}>
+-              <button
+-                onClick={() => {
 -                  setPosts([{ author: currentEmployee.name, body: draft }, ...posts]);
-+                  setPosts([{ body: draft }, ...posts]);
-                   setDraft("");
-                 }}
-                 disabled={!draft.trim()}
-               >
+-                  setDraft("");
+-                }}
+-                disabled={!draft.trim()}
+-              >
 -                Post as {currentEmployee.name}
-+                Post anonymously
-               </button>
-             </div>
-           </>
-@@ -51,10 +65,22 @@
+-              </button>
+-            </div>
+-          </>
+-        )}
++        <ProveMembership
++          set="verified-employees"
++          actionTag="post-access"
++          getMemberSecret={() => localCredentialStore.employeeCred}
++        >
++          <textarea
++            value={draft}
++            onChange={(e) => setDraft(e.target.value)}
++            placeholder="Share honest feedback..."
++          />
++          <div style={{ marginTop: 10 }}>
++            <button
++              onClick={() => {
++                setPosts([{ body: draft }, ...posts]);
++                setDraft("");
++              }}
++              disabled={!draft.trim()}
++            >
++              Post anonymously
++            </button>
++          </div>
++        </ProveMembership>
+       </div>
  
        {posts.map((p, i) => (
          <div className="post" key={i}>
@@ -95,7 +105,7 @@
 +
 +export function App() {
 +  return (
-+    <MidnightZapProvider backend={backend}>
++    <MidnightZapProvider>
 +      <Forum />
 +    </MidnightZapProvider>
 +  );

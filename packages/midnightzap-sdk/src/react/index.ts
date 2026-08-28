@@ -1,6 +1,8 @@
 export { MidnightZapProvider, useMidnightZapClient } from "./context.js";
+export type { MidnightZapProviderProps } from "./context.js";
 export { useProof } from "./useProof.js";
 export type { UseProofState } from "./useProof.js";
+export type { GatePresentationProps } from "./GateShell.js";
 export { ProveThreshold } from "./ProveThreshold.js";
 export type { ProveThresholdProps } from "./ProveThreshold.js";
 export { ProveMembership } from "./ProveMembership.js";

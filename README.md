@@ -15,14 +15,15 @@ value, and you have a working zero-knowledge gate.
 <ProveThreshold
   field="age"
   threshold={21}
-  subjectId={session.id}
   getPrivateValue={() => currentYear - user.birthYear}
-  onVerified={() => setCheckoutUnlocked(true)}
-/>
+>
+  <button>Complete purchase</button>   {/* revealed only after the proof verifies */}
+</ProveThreshold>
 ```
 
-No document upload. No ID scan. The app never sees the birth year — only a
-cryptographic proof that the threshold was met.
+No document upload. No ID scan. No `useState`, no wallet code. The app
+never sees the birth year — only a cryptographic proof that the threshold
+was met.
 
 Everything in this repo builds, typechecks, and passes its predicate tests:
 `npm install && npm run verify`.
@@ -103,31 +104,38 @@ CI runs the same steps on every push — `.github/workflows/ci.yml`.
 ## Add MidnightZap to your own app
 
 1. `npm install @midnightzap/sdk` (workspace-local in this repo).
-2. Wrap the subtree that needs a gate, once:
+2. Wrap the subtree that needs a gate, once — no props needed, it defaults
+   to an offline mock backend:
    ```tsx
    import { MidnightZapProvider } from "@midnightzap/sdk/react";
-   import { MockProofBackend } from "@midnightzap/sdk";
 
-   <MidnightZapProvider backend={new MockProofBackend()}>
+   <MidnightZapProvider>
      <App />
    </MidnightZapProvider>
    ```
-3. Drop a predicate component where the gate belongs — pass a getter for the
-   private value, and an `onVerified` to unlock your UI:
+3. Put the thing you're gating inside a predicate component and pass a
+   getter for the private value. The child is revealed once the proof
+   verifies — no `useState` to wire:
    ```tsx
    <ProveCredentialValid
      issuer="pharmacy-board"
-     subjectId={session.id}
      getExpiresAtUnix={() => localCredentialStore.get("rx").expiresAt}
-     onVerified={() => unlockRefill()}
-   />
+   >
+     <RefillButton />
+   </ProveCredentialValid>
    ```
-   For fully custom UI, use the render-prop form (`children={({ status, run }) => ...}`)
-   or the `useProof(predicate)` hook directly.
+   Prefer callbacks or custom UI? Use `onVerified` / `onRejected` /
+   `onError`, the `render={(state) => …}` prop, or the `useProof(predicate)`
+   hook directly. Theme every component with CSS variables
+   (`--mz-accent`, `--mz-radius`, …) or pass `unstyled`.
 4. When you're ready for a real network: compile the matching
    `compact/*.compact` template, deploy it, fill in
-   `src/core/liveBackend.ts`, and swap `MockProofBackend` →
-   `LiveMidnightBackend`. Nothing below the provider changes.
+   `src/core/liveBackend.ts`, and pass
+   `backend={new LiveMidnightBackend({ network: "testnet" })}` to the
+   provider. Nothing below it changes.
+
+The package-level [`packages/midnightzap-sdk/README.md`](packages/midnightzap-sdk/README.md)
+has the full component/prop reference.
 
 ## The before/after story (Integrate Midnight track)
 

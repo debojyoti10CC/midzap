@@ -21,8 +21,9 @@ first:
   is a checkbox swapped for one `<ProveThreshold>` component plus a
   `<MidnightZapProvider>` wrapper; the rest is comments and copy.
 - Cut to the running app (`npm run dev:ecommerce`): click "Prove age ≥ 21
-  privately," watch the status change (connecting → generating proof →
-  verified), badge appears, checkout unlocks.
+  privately," watch the button cycle through connecting → generating proof
+  → submitting, then the "Complete purchase" button it was gating appears
+  in its place.
 - Say: "The store never sees a birthdate, an ID, or your exact age — just a
   cryptographic proof the threshold was met."
 
@@ -32,8 +33,8 @@ first:
   name forever.
 - Cut to the diff (`docs/forum.diff.txt`).
 - Cut to the running app (`npm run dev:forum`): click "Verify membership...
-  anonymously," badge appears, post as "Verified employee (identity
-  hidden)."
+  anonymously," the composer it was gating appears, post as "Verified
+  employee (identity hidden)."
 - Say: "It's still provably a real, current employee — the forum just never
   learns which one. And a nullifier stops that same credential from posting
   twice under the same thread pretending to be different people."

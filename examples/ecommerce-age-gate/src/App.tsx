@@ -1,15 +1,10 @@
 // AFTER — same checkout, now with a real zero-knowledge age gate instead of
-// a self-reported checkbox. The whole integration: swap the checkbox for
-// <ProveThreshold>, wrap the tree in <MidnightZapProvider>. Nothing else
-// changes. Literal unified diff: docs/ecommerce.diff.txt.
+// a self-reported checkbox. The whole integration: wrap the tree in
+// <MidnightZapProvider> and put the gated button inside <ProveThreshold>.
+// Nothing else changes. Literal unified diff: docs/ecommerce.diff.txt.
 
 import React, { useState } from "react";
 import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
-import { MockProofBackend } from "@midnightzap/sdk";
-
-// In production, swap MockProofBackend for LiveMidnightBackend — see
-// packages/midnightzap-sdk/src/core/liveBackend.ts. Nothing below changes.
-const backend = new MockProofBackend();
 
 // Stand-in for however this app already knows the user's birth year
 // (account profile, a previously-issued credential, etc). MidnightZap
@@ -18,7 +13,6 @@ const currentUser = { birthYear: 2000 };
 
 function Checkout() {
   const [purchased, setPurchased] = useState(false);
-  const [unlocked, setUnlocked] = useState(false);
 
   return (
     <div>
@@ -31,15 +25,13 @@ function Checkout() {
           <ProveThreshold
             field="age"
             threshold={21}
-            subjectId="demo-session-1"
             getPrivateValue={() => new Date().getFullYear() - currentUser.birthYear}
-            onVerified={() => setUnlocked(true)}
-          />
+          >
+            <button disabled={purchased} onClick={() => setPurchased(true)}>
+              {purchased ? "Order placed" : "Complete purchase"}
+            </button>
+          </ProveThreshold>
         </div>
-
-        <button disabled={!unlocked || purchased} onClick={() => setPurchased(true)}>
-          {purchased ? "Order placed" : "Complete purchase"}
-        </button>
       </div>
       <p style={{ fontSize: 13, color: "#666", marginTop: 12 }}>
         Vino & Co. never sees your birth date, ID, or exact age — only a
@@ -51,7 +43,7 @@ function Checkout() {
 
 export function App() {
   return (
-    <MidnightZapProvider backend={backend}>
+    <MidnightZapProvider>
       <Checkout />
     </MidnightZapProvider>
   );

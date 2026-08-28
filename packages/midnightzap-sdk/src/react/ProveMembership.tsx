@@ -1,38 +1,39 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useProof } from "./useProof.js";
-import type { ProofStatus } from "../core/types.js";
+import { useResolvedSubjectId } from "./context.js";
+import { GateShell, type GatePresentationProps } from "./GateShell.js";
 
-export interface ProveMembershipProps {
+export interface ProveMembershipProps extends GatePresentationProps {
   /** Which private member set to check against, e.g. "verified-employees". */
   set: string;
   /** Scopes the anti-replay nullifier to one action, e.g. "login", "vote:proposal-12". */
   actionTag: string;
-  subjectId: string;
-  /** Returns the caller's membership credential secret (never transmitted raw). */
+  /**
+   * A stable, non-identifying id for this user/session. Optional — falls
+   * back to the id from <MidnightZapProvider> (auto-generated if unset).
+   */
+  subjectId?: string;
+  /** Returns the caller's membership credential secret (never transmitted raw). May be async. */
   getMemberSecret: () => string | Promise<string>;
   onVerified?: (receipt: string) => void;
+  /** Called when membership couldn't be proven, or the credential was already used for this action. */
   onRejected?: (reason: string) => void;
-  children?: (state: {
-    status: ProofStatus;
-    verified: boolean;
-    error?: string;
-    run: () => void;
-  }) => React.ReactNode;
+  onError?: (message: string) => void;
 }
 
 /**
  * Anonymous-but-verified access: proves "I hold a credential in this set"
- * without revealing which member you are, and prevents the same
- * credential from being replayed for the same action (e.g. voting twice,
- * or "anonymously" posting as two different people).
+ * without revealing which member you are, and a per-action nullifier
+ * stops the same credential being replayed (voting twice, "anonymously"
+ * posting as two people). Put the gated UI inside it:
  *
  *   <ProveMembership
  *     set="verified-employees"
  *     actionTag="login"
- *     subjectId={session.id}
  *     getMemberSecret={() => localCredentialStore.get("employeeCred")}
- *     onVerified={() => grantAnonymousSession()}
- *   />
+ *   >
+ *     <ForumComposer />
+ *   </ProveMembership>
  */
 export function ProveMembership({
   set,
@@ -41,36 +42,35 @@ export function ProveMembership({
   getMemberSecret,
   onVerified,
   onRejected,
-  children,
+  onError,
+  ...presentation
 }: ProveMembershipProps) {
-  const { status, verified, error, run } = useProof({ kind: "membership", set, actionTag });
+  const resolvedSubjectId = useResolvedSubjectId(subjectId);
+  const proof = useProof({ kind: "membership", set, actionTag });
 
-  const trigger = async () => {
-    const memberSecret = await getMemberSecret();
-    const result = await run(subjectId, { memberSecret });
+  const trigger = useCallback(async () => {
+    let memberSecret: string;
+    try {
+      memberSecret = await getMemberSecret();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      onError?.(message);
+      return;
+    }
+    const result = await proof.run(resolvedSubjectId, { memberSecret });
     if (result.verified && result.receipt) onVerified?.(result.receipt);
-    if (!result.verified && result.error) onRejected?.(result.error);
-  };
-
-  if (children) {
-    return <>{children({ status, verified, error, run: trigger })}</>;
-  }
+    else if (result.status === "error" && result.error) onError?.(result.error);
+    else if (result.error) onRejected?.(result.error);
+  }, [getMemberSecret, proof, resolvedSubjectId, onVerified, onRejected, onError]);
 
   return (
-    <div className="midnightzap-prove-membership" data-status={status}>
-      {!verified && (
-        <button onClick={trigger} disabled={status === "generating-proof" || status === "submitting"}>
-          {status === "idle" || status === "rejected" || status === "error"
-            ? `Verify membership in "${set}" anonymously`
-            : status === "connecting-wallet"
-            ? "Connecting wallet..."
-            : status === "generating-proof"
-            ? "Generating zero-knowledge proof..."
-            : "Submitting..."}
-        </button>
-      )}
-      {verified && <span className="midnightzap-verified-badge">&#10003; Verified member (identity hidden)</span>}
-      {error && <p className="midnightzap-error">{error}</p>}
-    </div>
+    <GateShell
+      proof={proof}
+      trigger={trigger}
+      wrapperClass="midnightzap-prove-membership"
+      idleLabel={`Verify membership in "${set}" anonymously`}
+      verifiedLabel="Verified member (identity hidden)"
+      {...presentation}
+    />
   );
 }
