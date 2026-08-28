@@ -47,8 +47,10 @@ packages/midnightzap-sdk/       The SDK: framework-agnostic core + React layer
 examples/ecommerce-age-gate/    BEFORE/AFTER: web2 checkbox age-gate → real ZK proof
 examples/forum-anon-login/      BEFORE/AFTER: real-name login → anonymous verified posting
 examples/pharmacy-refill/       BEFORE/AFTER: prescription photo upload → ZK "credential valid" proof
+compact/NOTES.md                First-compile fix list for the templates
 scripts/smoke-test.mjs          Headless test proving the predicate logic is correct
 scripts/gen-diffs.mjs           Regenerates the docs/*.diff.txt files from example source
+scripts/sync-managed.mjs        Copies compiled circuits into each example's public/
 scripts/deploy.mjs              One-time deploy of the three predicate contracts
 docs/GO_LIVE.md                 The one-time compile + deploy that makes proofs real
 docs/ARCHITECTURE.md            The three layers and the one seam (ProofBackend)

@@ -34,18 +34,16 @@ compactc compile compact/membership_proof.compact  examples/forum-anon-login/src
 compactc compile compact/expiry_proof.compact      examples/pharmacy-refill/src/managed/expiry
 ```
 
-**Expect errors on the first pass.** The templates are written to the
-documented syntax but have never been through `compactc`. Fix what it
-reports — usually stdlib signatures (`persistentHash`, `merkleTreePathRoot`,
-`verifySignature`, `disclose`). This replaces the checked-in placeholder
+**Expect errors on the first pass.** The templates have never been through
+`compactc`. `compact/NOTES.md` lists the specific spots most likely to
+need a fix, in the order the compiler hits them (the `0.23` pragma,
+`verifySignature`, `disclose` on public args, Merkle helper signatures).
+The compiled output replaces the checked-in placeholder
 `managed/**/index.cjs` files (which only exist so the repo builds).
 
-Then make the zk-params fetchable by the browser:
-
-```bash
-cp -r examples/ecommerce-age-gate/src/managed examples/ecommerce-age-gate/public/
-# …same for the other two
-```
+The zk-params get copied into each example's `public/` automatically by a
+`predev` / `prebuild` hook (`scripts/sync-managed.mjs`) — no manual copy
+step. Run it by hand any time with `npm run sync:managed -w ecommerce-age-gate`.
 
 ## 2. Deploy once
 
@@ -96,7 +94,8 @@ of it is transmitted.
 
 ```bash
 npm i @midnightzap/sdk
-cp -r node_modules/@midnightzap/sdk/managed public/    # if you vendored the compiled params
+# compile the templates into src/managed/ (once), then copy to public/:
+cp -r src/managed public/
 ```
 
 ```tsx

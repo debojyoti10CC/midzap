@@ -2,3 +2,6 @@ node_modules/
 dist/
 *.log
 .DS_Store
+
+# `compactc` output, copied into each example's public/ by scripts/sync-managed.mjs
+examples/*/public/managed/

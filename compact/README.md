@@ -42,8 +42,7 @@ supply the address and the compiled-module `load`. Full walkthrough:
 
 ## Status
 
-These are written to the documented Compact syntax (`language_version
-0.23`) but have **not** been run through the compiler in this repo. Treat a
-clean `compact compile` as step one of any real deployment; stdlib
-signatures (`persistentHash`, `disclose`, `merkleTreePathRoot`,
-`verifySignature`) can shift between releases.
+Written to the documented Compact syntax but **not** yet run through the
+compiler. `NOTES.md` in this folder lists the specific spots most likely to
+need a fix on the first `compactc compile`, in the order the compiler hits
+them. Treat a clean compile as step one of any real deployment.

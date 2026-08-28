@@ -5,6 +5,9 @@
   "description": "BEFORE/AFTER demo: a plain web2 employee forum with real-name login, then anonymous-but-verified login added via MidnightZap in ~10 lines.",
   "type": "module",
   "scripts": {
+    "sync:managed": "node ../../scripts/sync-managed.mjs",
+    "predev": "npm run sync:managed",
+    "prebuild": "npm run sync:managed",
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit"
