@@ -1,8 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// See ecommerce-age-gate/vite.config.ts for why `@midnight-ntwrk/*` is external.
-const midnightExternal = /^@midnight-ntwrk\//;
+// NOTE: the @midnight-ntwrk browser stack (WASM onchain-runtime + top-level
+// await + node builtins + a WebSocket shim) does not bundle in a stock Vite
+// setup. It is marked external here so this repo builds; a real deployment
+// needs Midnight's example-dApp Vite config (vite-plugin-wasm +
+// vite-plugin-top-level-await + vite-plugin-node-polyfills + a
+// resolve.alias for isomorphic-ws). See docs/GO_LIVE.md.
+const midnightExternal = /^@midnight-?ntwrk\//;
 
 export default defineConfig({
   plugins: [react()],

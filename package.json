@@ -29,6 +29,9 @@
     "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "^4.1.1",
     "@midnight-ntwrk/midnight-js-level-private-state-provider": "^4.1.1",
     "@midnight-ntwrk/midnight-js-types": "^4.1.1",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vite-plugin-node-polyfills": "^0.28.0",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0"
   }
 }

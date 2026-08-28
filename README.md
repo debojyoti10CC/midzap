@@ -107,11 +107,13 @@ npm run dev:forum        # http://localhost:5174 — anonymous verified forum
 npm run dev:pharmacy     # http://localhost:5175 — private "prescription still valid"
 ```
 
-The example apps render immediately, but a proof needs the one-time
-**`docs/GO_LIVE.md`** setup (compile the circuits with `compactc`, deploy
-once, paste the addresses into each `src/midnight.ts`). Until then the
-trigger button returns a clear "no deployed contract" error — never a fake
-success.
+The circuits are compiled and checked in. The example apps run their
+**predicate logic in-browser** (`InMemoryProofBackend`) for local preview,
+because the `@midnight-ntwrk` browser runtime (WASM + top-level await) does
+not bundle in a stock Vite app — that setup is the bulk of
+**`docs/GO_LIVE.md`**. With a working Midnight Vite baseline + deployed
+contracts, `VITE_MZ_LIVE=1 npm run dev:ecommerce` switches every example to
+the real `LiveMidnightBackend` (the SDK's default) with no code change.
 
 Other scripts: `npm run build` (SDK + all examples), `npm test` (predicate
 logic test), `npm run gen:diffs` (regenerate the diff docs). CI runs the

@@ -5,7 +5,17 @@
 
 import React, { useState } from "react";
 import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
+import { InMemoryProofBackend } from "@midnightzap/sdk";
 import { contracts } from "./midnight.js";
+
+// The @midnight-ntwrk browser runtime (WASM onchain-runtime + top-level
+// await) does not bundle in a stock Vite app yet — see docs/GO_LIVE.md.
+// So this demo runs the *predicate logic* locally via InMemoryProofBackend
+// to show the integration + UX. Once you've set up Midnight's dApp Vite
+// baseline and deployed the contracts, run with VITE_MZ_LIVE=1 to use the
+// real LiveMidnightBackend (the SDK's default) instead.
+const LIVE = Boolean((import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MZ_LIVE);
+const backend = LIVE ? undefined : new InMemoryProofBackend();
 
 // Stand-in for however this app already knows the user's birth year
 // (account profile, a previously-issued credential, etc). MidnightZap
@@ -44,8 +54,14 @@ function Checkout() {
 
 export function App() {
   return (
-    <MidnightZapProvider contracts={contracts} network="testnet">
+    <MidnightZapProvider backend={backend} contracts={contracts} network="testnet">
       <Checkout />
+      {!LIVE && (
+        <p style={{ fontSize: 12, color: "#999", marginTop: 20 }}>
+          Local preview — predicate logic runs in-browser. Real Midnight
+          proofs: see docs/GO_LIVE.md, then <code>VITE_MZ_LIVE=1</code>.
+        </p>
+      )}
     </MidnightZapProvider>
   );
 }

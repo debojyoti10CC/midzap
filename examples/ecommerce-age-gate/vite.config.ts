@@ -1,11 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// The `@midnight-ntwrk/*` stack is loaded lazily by LiveMidnightBackend and
-// is an optional peer dependency. Install it in a real deployment
-// (`npm i @midnight-ntwrk/midnight-js-contracts ...` — see docs/GO_LIVE.md);
-// here it's marked external so the example still builds without it.
-const midnightExternal = /^@midnight-ntwrk\//;
+// NOTE: the @midnight-ntwrk browser stack (WASM onchain-runtime + top-level
+// await + node builtins + a WebSocket shim) does not bundle in a stock Vite
+// setup. It is marked external here so this repo builds; a real deployment
+// needs Midnight's example-dApp Vite config (vite-plugin-wasm +
+// vite-plugin-top-level-await + vite-plugin-node-polyfills + a
+// resolve.alias for isomorphic-ws). See docs/GO_LIVE.md.
+const midnightExternal = /^@midnight-?ntwrk\//;
 
 export default defineConfig({
   plugins: [react()],

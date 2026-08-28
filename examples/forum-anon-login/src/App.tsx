@@ -8,7 +8,14 @@
 
 import React, { useState } from "react";
 import { MidnightZapProvider, ProveMembership } from "@midnightzap/sdk/react";
+import { InMemoryProofBackend } from "@midnightzap/sdk";
 import { contracts } from "./midnight.js";
+
+// See ecommerce-age-gate/src/App.tsx for why: the @midnight-ntwrk browser
+// runtime doesn't bundle in stock Vite yet. Local preview runs the
+// predicate logic in-browser; VITE_MZ_LIVE=1 uses the real backend.
+const LIVE = Boolean((import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MZ_LIVE);
+const backend = LIVE ? undefined : new InMemoryProofBackend();
 
 // Stand-in for a credential this employee was already issued (e.g. at
 // onboarding) and holds locally — never uploaded to the forum.
@@ -68,8 +75,14 @@ function Forum() {
 
 export function App() {
   return (
-    <MidnightZapProvider contracts={contracts} network="testnet">
+    <MidnightZapProvider backend={backend} contracts={contracts} network="testnet">
       <Forum />
+      {!LIVE && (
+        <p style={{ fontSize: 12, color: "#999", marginTop: 20 }}>
+          Local preview — predicate logic runs in-browser. Real Midnight
+          proofs: see docs/GO_LIVE.md, then <code>VITE_MZ_LIVE=1</code>.
+        </p>
+      )}
     </MidnightZapProvider>
   );
 }

@@ -21,10 +21,35 @@ Install the SDK's optional peer deps (already added to this repo's root
 npm i @midnight-ntwrk/compact-runtime @midnight-ntwrk/midnight-js-contracts @midnight-ntwrk/midnight-js-types @midnight-ntwrk/midnight-js-level-private-state-provider @midnight-ntwrk/midnight-js-indexer-public-data-provider @midnight-ntwrk/midnight-js-http-client-proof-provider @midnight-ntwrk/midnight-js-fetch-zk-config-provider @midnight-ntwrk/dapp-connector-api
 ```
 
-Then, for a browser build that actually loads them, drop the
-`build.rollupOptions.external: [/^@midnight-ntwrk\//]` line from each
-example's `vite.config.ts` (it's there only so the repo builds without the
-stack) — you will likely also need `vite-plugin-node-polyfills`.
+### Bundling the browser stack (this is the hard part)
+
+`@midnight-ntwrk/compact-runtime` pulls `@midnightntwrk/onchain-runtime-v4`
+(Rust → WASM), and the indexer provider uses `isomorphic-ws`. A stock Vite
+app **cannot** bundle this — you need, at minimum:
+
+- `vite-plugin-wasm` + `vite-plugin-top-level-await`
+- `vite-plugin-node-polyfills`
+- `resolve.alias` mapping `isomorphic-ws` to a browser `WebSocket` shim
+- the `@midnight-ntwrk/*` + `@midnightntwrk/*` packages in `optimizeDeps.exclude`
+
+Rather than assemble this by hand, **copy the `vite.config.ts` from a
+current Midnight example dApp** (they solve exactly this) and layer the
+MidnightZap component usage on top. The example configs in this repo mark
+the stack `external` so the repo builds; they are not a working live
+config.
+
+### Running this repo's examples against a real network
+
+Each example (`src/App.tsx`) uses `InMemoryProofBackend` for local preview
+because of the above. Once you have a working Midnight Vite baseline and
+deployed contracts:
+
+```
+VITE_MZ_LIVE=1 npm run dev:ecommerce
+```
+
+That drops the in-memory backend and lets `<MidnightZapProvider>` build the
+real `LiveMidnightBackend` from `contracts`.
 
 ## 1. Compile the circuits (already done — output is checked in)
 

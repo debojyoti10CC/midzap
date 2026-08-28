@@ -1,6 +1,6 @@
 --- a/examples/ecommerce-age-gate/src/App.before.tsx
 +++ b/examples/ecommerce-age-gate/src/App.tsx
-@@ -1,33 +1,51 @@
+@@ -1,33 +1,67 @@
 -// BEFORE — an ordinary web2 checkout. "Age verification" is a self-reported
 -// checkbox, which proves nothing. Not wired into the Vite build; it's the
 -// "before" half of the story. Diff vs App.tsx: docs/ecommerce.diff.txt.
@@ -41,7 +41,17 @@
 +
 +import React, { useState } from "react";
 +import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
++import { InMemoryProofBackend } from "@midnightzap/sdk";
 +import { contracts } from "./midnight.js";
++
++// The @midnight-ntwrk browser runtime (WASM onchain-runtime + top-level
++// await) does not bundle in a stock Vite app yet — see docs/GO_LIVE.md.
++// So this demo runs the *predicate logic* locally via InMemoryProofBackend
++// to show the integration + UX. Once you've set up Midnight's dApp Vite
++// baseline and deployed the contracts, run with VITE_MZ_LIVE=1 to use the
++// real LiveMidnightBackend (the SDK's default) instead.
++const LIVE = Boolean((import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MZ_LIVE);
++const backend = LIVE ? undefined : new InMemoryProofBackend();
 +
 +// Stand-in for however this app already knows the user's birth year
 +// (account profile, a previously-issued credential, etc). MidnightZap
@@ -80,8 +90,14 @@
 +
 +export function App() {
 +  return (
-+    <MidnightZapProvider contracts={contracts} network="testnet">
++    <MidnightZapProvider backend={backend} contracts={contracts} network="testnet">
 +      <Checkout />
++      {!LIVE && (
++        <p style={{ fontSize: 12, color: "#999", marginTop: 20 }}>
++          Local preview — predicate logic runs in-browser. Real Midnight
++          proofs: see docs/GO_LIVE.md, then <code>VITE_MZ_LIVE=1</code>.
++        </p>
++      )}
 +    </MidnightZapProvider>
 +  );
 +}
