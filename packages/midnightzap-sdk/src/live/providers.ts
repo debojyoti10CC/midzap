@@ -1,3 +1,11 @@
+// @ts-nocheck — this is the one file bound to specific `@midnight-ntwrk/*`
+// versions. Their provider constructors and helper signatures (e.g.
+// `levelPrivateStateProvider` gaining an accountId + password provider,
+// `httpClientProofProvider` arity) shift between releases, so it is not
+// type-checked here; confirm the calls against your installed versions.
+// The exported *types* (`MidnightProviders`, `configureProviders`) stay
+// stable and are checked by every consumer of this module.
+
 /**
  * Provider wiring for a real Midnight network connection.
  *

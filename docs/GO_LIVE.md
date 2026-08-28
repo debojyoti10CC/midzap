@@ -14,17 +14,17 @@ after that is ~5 minutes (last section).
 | tDUST | pays for deploy + proof txs | `faucet.testnet.midnight.network` |
 | Proof server | generates proofs client-side | bundled with Lace, or `docker run -p 6300:6300 midnightnetwork/proof-server` |
 
-Install the SDK's optional peer deps in your app:
+Install the SDK's optional peer deps (already added to this repo's root
+`devDependencies` — `npm install` picks them up). One line, any shell:
 
-```bash
-npm i @midnight-ntwrk/midnight-js-contracts \
-      @midnight-ntwrk/midnight-js-types \
-      @midnight-ntwrk/midnight-js-level-private-state-provider \
-      @midnight-ntwrk/midnight-js-indexer-public-data-provider \
-      @midnight-ntwrk/midnight-js-http-client-proof-provider \
-      @midnight-ntwrk/midnight-js-fetch-zk-config-provider \
-      @midnight-ntwrk/dapp-connector-api
 ```
+npm i @midnight-ntwrk/compact-runtime @midnight-ntwrk/midnight-js-contracts @midnight-ntwrk/midnight-js-types @midnight-ntwrk/midnight-js-level-private-state-provider @midnight-ntwrk/midnight-js-indexer-public-data-provider @midnight-ntwrk/midnight-js-http-client-proof-provider @midnight-ntwrk/midnight-js-fetch-zk-config-provider @midnight-ntwrk/dapp-connector-api
+```
+
+Then, for a browser build that actually loads them, drop the
+`build.rollupOptions.external: [/^@midnight-ntwrk\//]` line from each
+example's `vite.config.ts` (it's there only so the repo builds without the
+stack) — you will likely also need `vite-plugin-node-polyfills`.
 
 ## 1. Compile the circuits (already done — output is checked in)
 
