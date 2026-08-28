@@ -5,3 +5,6 @@ dist/
 
 # `compactc` output, copied into each example's public/ by scripts/sync-managed.mjs
 examples/*/public/managed/
+
+# CLI ships compiled circuits copied from examples/ at publish time
+packages/midnightzap-cli/recipes/managed/

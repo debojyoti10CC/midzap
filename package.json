@@ -9,16 +9,19 @@
   ],
   "scripts": {
     "build:sdk": "npm run build --workspace=@midnightzap/sdk",
-    "build:examples": "npm run build --workspace=ecommerce-age-gate && npm run build --workspace=forum-anon-login && npm run build --workspace=pharmacy-refill",
-    "build": "npm run build:sdk && npm run build:examples",
+    "build:cli": "npm run build --workspace=@midnightzap/cli",
+    "build:examples": "npm run build --workspace=plain-shop && npm run build --workspace=ecommerce-age-gate && npm run build --workspace=forum-anon-login && npm run build --workspace=pharmacy-refill",
+    "build": "npm run build:sdk && npm run build:cli && npm run build:examples",
     "dev": "npm run dev --workspace=ecommerce-age-gate",
     "dev:ecommerce": "npm run dev --workspace=ecommerce-age-gate",
     "dev:forum": "npm run dev --workspace=forum-anon-login",
     "dev:pharmacy": "npm run dev --workspace=pharmacy-refill",
+    "dev:plain": "npm run dev --workspace=plain-shop",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run build:sdk && node scripts/smoke-test.mjs",
+    "cli:e2e": "npm run build:sdk && npm run build:cli && node scripts/cli-e2e.mjs",
     "gen:diffs": "node scripts/gen-diffs.mjs",
-    "verify": "npm run build:sdk && npm run typecheck && node scripts/smoke-test.mjs && npm run gen:diffs"
+    "verify": "npm run build:sdk && npm run build:cli && npm run typecheck && node scripts/smoke-test.mjs && node scripts/cli-e2e.mjs && npm run gen:diffs"
   },
   "devDependencies": {
     "@midnight-ntwrk/compact-runtime": "^0.19.0",
