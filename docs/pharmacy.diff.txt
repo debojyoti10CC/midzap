@@ -1,0 +1,74 @@
+--- a/examples/pharmacy-refill/src/App.before.tsx
++++ b/examples/pharmacy-refill/src/App.tsx
+@@ -1,13 +1,22 @@
+-// BEFORE — an online pharmacy refill flow. To refill, you upload a photo of
+-// your paper prescription, which the pharmacy stores: it now holds an image
+-// of a medical document with your name, drug, prescriber, and dates on it.
+-// Not wired into the Vite build; it's the "before" half of the story.
+-// Diff vs App.tsx: docs/pharmacy.diff.txt.
++// AFTER — same refill flow, now with a zero-knowledge "credential valid"
++// proof instead of a document upload. The customer proves their
++// prescription was issued by a trusted prescriber and hasn't expired —
++// the pharmacy never receives the document, the name, the prescriber, or
++// the dates. The whole integration: wrap the tree in <MidnightZapProvider>
++// and put the refill button inside <ProveCredentialValid>.
++// Literal unified diff: docs/pharmacy.diff.txt.
+ 
+ import React, { useState } from "react";
++import { MidnightZapProvider, ProveCredentialValid } from "@midnightzap/sdk/react";
+ 
+-export function App() {
+-  const [file, setFile] = useState<File | null>(null);
++// Stand-in for a signed prescription credential the customer already holds
++// locally (issued by their doctor's system at prescribing time). Only its
++// expiry timestamp is read, on-device, to build the proof.
++const localCredentialStore = {
++  prescription: { expiresAtUnix: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 120 },
++};
++
++function Refill() {
+   const [refilled, setRefilled] = useState(false);
+ 
+   return (
+@@ -17,19 +26,29 @@
+         <p className="drug">Atorvastatin 20mg — 90 tablets</p>
+         <p>Refill requires a valid, current prescription.</p>
+ 
+-        <label style={{ display: "block", margin: "12px 0" }}>
+-          Upload a photo of your prescription:{" "}
+-          <input
+-            type="file"
+-            accept="image/*"
+-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+-          />
+-        </label>
+-
+-        <button disabled={!file || refilled} onClick={() => setRefilled(true)}>
+-          {refilled ? "Refill requested" : "Request refill"}
+-        </button>
++        <div style={{ margin: "12px 0" }}>
++          <ProveCredentialValid
++            issuer="prescriber-registry"
++            getExpiresAtUnix={() => localCredentialStore.prescription.expiresAtUnix}
++          >
++            <button disabled={refilled} onClick={() => setRefilled(true)}>
++              {refilled ? "Refill requested" : "Request refill"}
++            </button>
++          </ProveCredentialValid>
++        </div>
+       </div>
++      <p style={{ fontSize: 13, color: "#666", marginTop: 12 }}>
++        MeadowRx never sees your prescription document, your prescriber, or
++        the dates on it — only a proof that a valid, unexpired one exists.
++      </p>
+     </div>
+   );
+ }
++
++export function App() {
++  return (
++    <MidnightZapProvider>
++      <Refill />
++    </MidnightZapProvider>
++  );
++}

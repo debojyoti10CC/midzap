@@ -46,13 +46,18 @@ compact/                        Three Compact circuit templates (see below)
 packages/midnightzap-sdk/       The SDK: framework-agnostic core + React layer
 examples/ecommerce-age-gate/    BEFORE/AFTER: web2 checkbox age-gate → real ZK proof
 examples/forum-anon-login/      BEFORE/AFTER: real-name login → anonymous verified posting
+examples/pharmacy-refill/       BEFORE/AFTER: prescription photo upload → ZK "credential valid" proof
 scripts/smoke-test.mjs          Headless test proving the predicate logic is correct
 scripts/gen-diffs.mjs           Regenerates the docs/*.diff.txt files from example source
 docs/ARCHITECTURE.md            The three layers and the one seam (ProofBackend)
 docs/DEMO_SCRIPT.md             Paced ~1:50 script for the demo video
 docs/ecommerce.diff.txt         Literal unified diff for the checkout integration
 docs/forum.diff.txt             Literal unified diff for the forum integration
+docs/pharmacy.diff.txt          Literal unified diff for the pharmacy integration
 ```
+
+One example per predicate — `<ProveThreshold>`, `<ProveMembership>`,
+`<ProveCredentialValid>` — each shipping as a real before/after diff.
 
 ### The three predicate templates (`/compact`)
 
@@ -76,16 +81,19 @@ Two backends, one interface (`ProofBackend`) — this seam is the whole design
 - **`MockProofBackend`** — deterministic, in-memory, zero network calls.
   Evaluates the *same logic* the Compact circuits enforce, so the demo
   behaves honestly, but needs no testnet, faucet, or wallet extension. This
-  is what both example apps use, so they run instantly anywhere.
-- **`LiveMidnightBackend`** — the real adapter, scaffolded against
+  is what every example app uses, so they run instantly anywhere.
+- **`LiveMidnightBackend`** — the real adapter against
   `@midnight-ntwrk/wallet-api`, `@midnight-ntwrk/dapp-connector-api`, and
-  `@midnight-ntwrk/midnight-js-contracts`. It's intentionally left as a
-  checklist (see the TODOs in `src/core/liveBackend.ts`) rather than faked,
-  because wiring a real wallet connection needs a browser with an installed
-  wallet extension and a deployed contract address — neither of which exists
-  in a clean checkout. Swapping it in is a one-line change:
-  `<MidnightZapProvider backend={new LiveMidnightBackend()}>` — nothing
-  else in a host app changes.
+  `@midnight-ntwrk/midnight-js-contracts`. Wallet discovery + connection
+  (the injected `window.midnight` connector), the status lifecycle, and the
+  per-predicate witness assembly are implemented; the two remaining
+  `// CONFIRM:` markers in `src/core/liveBackend.ts` are the contract-call
+  surface, which needs pinning to your installed SDK version and a deployed
+  contract address (pass `new LiveMidnightBackend({ contracts: {…} })` — see
+  `compact/README.md`). Until then it returns a precise error instead of
+  faking a proof. Swapping it in is a one-line change:
+  `<MidnightZapProvider backend={new LiveMidnightBackend({ network: "testnet" })}>`
+  — nothing else in a host app changes.
 
 ## Quickstart
 
@@ -95,9 +103,10 @@ npm run verify            # build SDK + typecheck all workspaces + predicate smo
 
 npm run dev:ecommerce     # http://localhost:5173 — age-gated checkout demo
 npm run dev:forum         # http://localhost:5174 — anonymous verified forum demo
+npm run dev:pharmacy      # http://localhost:5175 — private "prescription still valid" demo
 ```
 
-Other scripts: `npm run build` (SDK + both examples), `npm test` (smoke test
+Other scripts: `npm run build` (SDK + all examples), `npm test` (smoke test
 only), `npm run gen:diffs` (regenerate the diff docs from example source).
 CI runs the same steps on every push — `.github/workflows/ci.yml`.
 
@@ -139,19 +148,21 @@ has the full component/prop reference.
 
 ## The before/after story (Integrate Midnight track)
 
-Both examples ship as a real, regenerated diff, not a description:
+All three examples ship as a real, regenerated diff, not a description:
 
-- `examples/ecommerce-age-gate/src/App.before.tsx` → a self-reported
-  checkbox ("I confirm I am 21+"), which proves nothing.
-- `examples/ecommerce-age-gate/src/App.tsx` → the same page with the
-  checkbox replaced by `<ProveThreshold>` and the tree wrapped in
-  `<MidnightZapProvider>`. Full diff: `docs/ecommerce.diff.txt`.
-- `examples/forum-anon-login/src/App.before.tsx` → real-name company login,
-  so every "candid" post is quietly tied to a real employee forever.
-- `examples/forum-anon-login/src/App.tsx` → the same forum with real-name
-  login replaced by `<ProveMembership>` — provably a current employee,
-  provably not the same employee posting twice under one thread, and never
-  which employee. Full diff: `docs/forum.diff.txt`.
+- **Age gate** — `ecommerce-age-gate/App.before.tsx` is a self-reported
+  checkbox ("I confirm I am 21+"); `App.tsx` replaces it with
+  `<ProveThreshold>`. Diff: `docs/ecommerce.diff.txt`.
+- **Anonymous membership** — `forum-anon-login/App.before.tsx` is real-name
+  company login, tying every "candid" post to an employee forever; `App.tsx`
+  swaps in `<ProveMembership>` — provably a current employee, provably not
+  posting twice under one thread, never which employee. Diff:
+  `docs/forum.diff.txt`.
+- **Credential validity** — `pharmacy-refill/App.before.tsx` uploads a photo
+  of a paper prescription for the pharmacy to store; `App.tsx` swaps in
+  `<ProveCredentialValid>` — proof the prescription is signed and unexpired,
+  with no document, name, prescriber, or dates disclosed. Diff:
+  `docs/pharmacy.diff.txt`.
 
 The diffs are generated by `npm run gen:diffs` and CI fails if they drift
 from the example source.
@@ -160,15 +171,15 @@ from the example source.
 
 - **Technology** — a real abstraction layer over three distinct ZK circuit
   shapes (threshold / membership+nullifier / issuer-signature+expiry), a
-  pluggable backend so the same component tree runs mocked or live, and two
-  working integrations, not one.
+  pluggable backend so the same component tree runs mocked or live, and
+  three working integrations, not one.
 - **Originality** — Midnight's hackathon history so far is mostly one-off
   identity/compliance apps; this is developer infrastructure that makes the
   *next* fifty of those apps cheaper to build.
-- **Execution** — SDK and both examples build, typecheck, and pass a
+- **Execution** — SDK and all three examples build, typecheck, and pass a
   headless end-to-end check of every predicate; CI enforces all of it.
 - **Completion** — deliberately scoped to 3 predicate templates + 3 React
-  components + 2 real integrations rather than one sprawling app.
+  components + 3 one-per-predicate integrations rather than one sprawling app.
 - **Documentation** — this README, `docs/ARCHITECTURE.md`, and two literal
   unified diffs *are* the product story.
 - **Business value** — dev tooling is the highest-leverage thing to build in
@@ -177,9 +188,11 @@ from the example source.
 
 ## Honesty notes
 
-- `LiveMidnightBackend` is a scaffold, not a finished driver — see the file
-  for exactly what's left and why (browser wallet + deployed contract
-  address are needed, and neither exists in a sandboxed build).
+- `LiveMidnightBackend` implements wallet discovery/connection and witness
+  assembly, but the contract-call surface (2 `// CONFIRM:` markers) still
+  needs pinning to a specific `@midnight-ntwrk/*` version and a deployed
+  contract address — neither exists in a clean checkout. It errors clearly
+  rather than faking that step.
 - The `.compact` files are real Compact syntax based on official docs, not
   fabricated pseudocode, but have not been run through the `compact`
   compiler in this environment — compile-check them before you deploy.

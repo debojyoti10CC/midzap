@@ -9,13 +9,15 @@
   ],
   "scripts": {
     "build:sdk": "npm run build --workspace=@midnightzap/sdk",
-    "build": "npm run build:sdk && npm run build --workspace=ecommerce-age-gate && npm run build --workspace=forum-anon-login",
+    "build:examples": "npm run build --workspace=ecommerce-age-gate && npm run build --workspace=forum-anon-login && npm run build --workspace=pharmacy-refill",
+    "build": "npm run build:sdk && npm run build:examples",
     "dev:ecommerce": "npm run dev --workspace=ecommerce-age-gate",
     "dev:forum": "npm run dev --workspace=forum-anon-login",
+    "dev:pharmacy": "npm run dev --workspace=pharmacy-refill",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run build:sdk && node scripts/smoke-test.mjs",
     "gen:diffs": "node scripts/gen-diffs.mjs",
-    "verify": "npm run build:sdk && npm run typecheck && node scripts/smoke-test.mjs"
+    "verify": "npm run build:sdk && npm run typecheck && node scripts/smoke-test.mjs && npm run gen:diffs"
   },
   "devDependencies": {
     "typescript": "^5.5.4"

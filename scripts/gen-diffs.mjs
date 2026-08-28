@@ -19,13 +19,24 @@ const pairs = [
     after: "examples/forum-anon-login/src/App.tsx",
     out: "docs/forum.diff.txt",
   },
+  {
+    before: "examples/pharmacy-refill/src/App.before.tsx",
+    after: "examples/pharmacy-refill/src/App.tsx",
+    out: "docs/pharmacy.diff.txt",
+  },
 ];
 
 for (const { before, after, out } of pairs) {
   let diff = "";
   try {
     // `diff` exits 1 when files differ — that's the expected path.
-    execFileSync("diff", ["-u", before, after], { cwd: root });
+    // `--label` pins the header lines so the output is deterministic
+    // (no embedded mtimes), which keeps the CI drift check stable.
+    execFileSync(
+      "diff",
+      ["-u", "--label", `a/${before}`, "--label", `b/${after}`, before, after],
+      { cwd: root }
+    );
   } catch (err) {
     diff = err.stdout?.toString() ?? "";
   }
@@ -33,7 +44,8 @@ for (const { before, after, out } of pairs) {
     console.error(`FAIL ${out}: no diff produced (are before/after identical or is 'diff' missing?)`);
     process.exit(1);
   }
-  writeFileSync(resolve(root, out), diff);
+  // Normalise to LF so the committed artifact matches CI (which runs on Linux).
+  writeFileSync(resolve(root, out), diff.replace(/\r\n/g, "\n"));
   const changed = diff.split("\n").filter((l) => /^[+-][^+-]/.test(l)).length;
   console.log(`wrote ${out}  (${changed} changed lines)`);
 }

@@ -36,7 +36,7 @@ It does that with three layers.
 │ MockProofBackend      │   │ LiveMidnightBackend                      │
 │ deterministic, in-mem │   │ wallet connect + Compact contract calls  │
 │ evaluates the SAME    │   │ against a deployed predicate contract    │
-│ logic the circuits do │   │ (scaffold — see core/liveBackend.ts)     │
+│ logic the circuits do │   │ (connect done; call surface: 2 CONFIRMs) │
 │ → demos run offline   │   │                                          │
 └───────────────────────┘   └───────────────┬──────────────────────────┘
                                             ▼
