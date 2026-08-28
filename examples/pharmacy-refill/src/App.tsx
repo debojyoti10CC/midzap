@@ -10,11 +10,15 @@ import React, { useState } from "react";
 import { MidnightZapProvider, ProveCredentialValid } from "@midnightzap/sdk/react";
 import { contracts } from "./midnight.js";
 
-// Stand-in for a signed prescription credential the customer already holds
-// locally (issued by their doctor's system at prescribing time). Only its
-// expiry timestamp is read, on-device, to build the proof.
+// Stand-in for a prescription credential the customer already holds locally
+// (issued by their doctor's system at prescribing time). `hash` is a
+// one-way hash of the credential — registered on-chain by the issuer with
+// its expiry. Nothing here is the document, the name, or the dates.
 const localCredentialStore = {
-  prescription: { expiresAtUnix: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 120 },
+  prescription: {
+    hash: "9f2a4c1e8b7d6a5f0c3e2d1b4a6f8c7e9d0b1a2c3e4d5f6a7b8c9d0e1f2a3b4c",
+    expiresAtUnix: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 120,
+  },
 };
 
 function Refill() {
@@ -31,6 +35,7 @@ function Refill() {
           <ProveCredentialValid
             issuer="prescriber-registry"
             getExpiresAtUnix={() => localCredentialStore.prescription.expiresAtUnix}
+            getExtraWitness={() => ({ credentialHash: localCredentialStore.prescription.hash })}
           >
             <button disabled={refilled} onClick={() => setRefilled(true)}>
               {refilled ? "Refill requested" : "Request refill"}

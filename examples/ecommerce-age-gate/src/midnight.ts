@@ -1,13 +1,13 @@
-// Wiring for the real Midnight backend.
+// Real Midnight wiring for this example.
 //
-// Fill this in after the one-time setup in docs/GO_LIVE.md:
-//   1. compactc compile compact/threshold_proof.compact  ./src/managed/threshold
-//   2. cp -r src/managed public/                          (so the browser can fetch zk-params)
-//   3. deploy the contract once, paste its address below.
+// The threshold circuit is already compiled (checked in under
+// src/managed/threshold/). To run real proofs you still need to:
+//   1. deploy it once  — `node scripts/deploy.mjs`  (see docs/GO_LIVE.md)
+//   2. paste its address into THRESHOLD_CONTRACT_ADDRESS below
+//   3. install the @midnight-ntwrk/* peer deps
 //
-// Until then the app loads and the checkout renders, but clicking
-// "Prove age…" returns a clear "no deployed contract" error instead of a
-// fake success.
+// Until the address is set, the checkout renders and clicking "Prove age…"
+// returns a clear "no deployed contract" error — never a fake success.
 
 import type { ContractBindings } from "@midnightzap/sdk";
 
@@ -16,9 +16,7 @@ export const THRESHOLD_CONTRACT_ADDRESS = "0xREPLACE_WITH_DEPLOYED_THRESHOLD_ADD
 export const contracts: ContractBindings = {
   threshold: {
     address: THRESHOLD_CONTRACT_ADDRESS,
-    // `managed/` is emitted by `compactc` (step 1). A placeholder module is
-    // checked in so the app builds before you compile; it throws if invoked.
-    // @ts-ignore -- resolved to real types once compiled.
-    load: () => import("./managed/threshold/contract/index.cjs"),
+    // @ts-ignore -- generated module; its .d.ts pulls @midnight-ntwrk/compact-runtime.
+    load: () => import("./managed/threshold/contract/index.js"),
   },
 };

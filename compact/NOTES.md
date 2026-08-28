@@ -1,81 +1,75 @@
-# First-compile notes for the `.compact` templates
+# Compile notes for the `.compact` templates
 
-These circuits are written to the documented Compact syntax but have **not**
-been through `compactc`. This is the list of spots most likely to need a
-fix on your first `compactc compile`, roughly in the order the compiler
-will hit them. Fix against the messages it prints and the
-`CompactStandardLibrary` your toolchain ships.
+All three compile cleanly with `compact` toolchain **0.34.0**
+(`compactc` 0.34.0). This records what was changed to get there and the
+one deliberate simplification.
 
-## 1. `pragma language_version 0.23;` — almost certainly wrong
+## What the first compile required
 
-The **language** version and the **compiler** version are different
-schemes. Set the pragma to whatever your installed toolchain expects — run
-`compactc --version` and check docs.midnight.network. A range is often
-accepted: `pragma language_version >= 0.16;`. This is in all three files.
+1. **`pragma language_version 0.26.0;`** — the toolchain rejected `0.23`
+   with `language version 0.26.0 mismatch`. The *compiler* is 0.34.x; the
+   *language* pragma it wants is `0.26.0`.
 
-## 2. `verifySignature(...)` in `expiry_proof.compact` — likely does not exist
+2. **`const` on every local binding.** `value = expr;` is an unbound
+   identifier — Compact 0.26 needs `const value = expr;`.
 
-In-circuit signature verification is not something the Compact stdlib has
-shipped historically. If `verifySignature` isn't available, restructure the
-expiry proof the same way as membership: instead of checking a signature,
-prove `credentialHash` is a leaf in a Merkle tree of issuer-attested
-credentials (root kept in `trustedIssuers` / a new `credentialRoot`
-ledger). Keep the `expiry > nowUnix` check as-is — that part is fine.
+3. **`disclose()` on ledger-key arguments.** The disclosure analysis flags
+   any circuit parameter used as a `Map`/`Set` key as a potential witness
+   leak and *requires* `disclose(...)` around it — even for values that are
+   already public circuit arguments (`subjectId`, credential hash, member
+   commitment). So `disclose` here is mandatory, not forbidden.
 
-## 3. `disclose(...)` on public arguments — probably a type error
+## The membership / expiry simplification (v1)
 
-`disclose` declassifies **witness-derived** data before it goes on-chain.
-These call sites pass values that are already public circuit arguments, so
-`disclose` is likely rejected or warned:
+`merkleTreePathRoot<#n, T>(path: MerkleTreePath<n, T>): MerkleTreeDigest`
+exists, and a fully-anonymous version is possible with it. To keep this
+milestone shippable, v1 uses a simpler on-chain structure instead:
 
-- `threshold_proof.compact:40` — `verified.insert(disclose(subjectId), true)` → use `subjectId` directly.
-- `expiry_proof.compact:29` — `disclose(issuerKey)` → use `issuerKey`.
-- `membership_proof.compact:35` — `disclose(newRoot)` → use `newRoot`.
+- **membership** — member *commitments* (`persistentHash(["member:", secret])`)
+  live in an on-chain `Set<Bytes<32>>`; the proof asserts
+  `members.member(disclose(commitment))`. This is **pseudonymous**: the
+  commitment (a hash, never a name) is revealed, so repeat actions by one
+  member are linkable. The per-action nullifier still prevents double-acting.
 
-`membership_proof.compact:49` — `disclose(nullifier)` **is** correct;
-`nullifier` derives from `secret`, which is a witness.
+- **expiry** — the issuer registers `credentialHash -> expiry` in an
+  on-chain `Map`; the proof reveals the hash and asserts the recorded
+  expiry is in the future. In-circuit signature verification
+  (`verifySignature`) is not in the stdlib, so the "trusted issuer" check
+  is "the issuer put this hash in the registry".
 
-## 4. Merkle + hash stdlib signatures — check exact names
+### Upgrading to fully anonymous
 
-- `merkleTreePathRoot(proof, leaf)` (membership:45) — the helper may take
-  only the path (with the leaf embedded), or be a method on a `MerkleTree`
-  type. Adjust to your stdlib.
-- `persistentHash<Vector<2, Bytes<32>>>([a, b])` (membership:43, 47) — the
-  generic + vector-literal form may differ; some versions want
-  `persistentHash([a, b])` or a specific element type.
-- `MerkleTreePath<32, Bytes<32>>` (membership:32) — confirm the type name
-  and arity.
+Replace the `Set` / `Map` with a Merkle tree whose root is the only
+on-chain state, add `witness merkleProof(): MerkleTreePath<n, Bytes<32>>`,
+and assert `merkleTreePathRoot<n, Bytes<32>>(merkleProof()) == root`
+without disclosing the leaf. Then:
 
-## 5. `Map<_, Boolean>` used as a set — consider `Set`
+- add the path back to `MembershipPrivateState` / `ExpiryPrivateState` in
+  `packages/midnightzap-sdk/src/live/witnesses.ts`,
+- have `<ProveMembership getExtraWitness={() => ({ merklePath })} />` /
+  `<ProveCredentialValid getExtraWitness={() => ({ merklePath })} />` fetch
+  the path from the set/registry operator's tree service,
+- update `SPECS[...].toPrivateState` in `liveBackend.ts`.
 
-`verified`, `trustedIssuers`, and `spentNullifiers` only ever store
-`true`. If your stdlib has a `Set<Bytes<32>>` ledger ADT, use it:
-`.insert(k)` / `.member(k)`, and drop the `Boolean` value. That also
-simplifies `isVerified` (item 6).
+## Load-bearing names
 
-## 6. `isVerified` — ternary and read-only circuit
+`liveBackend.ts` references circuits and witnesses by name — keep these in
+sync if you edit a template:
 
-`threshold_proof.compact:43-45` returns
-`verified.member(x) ? verified.lookup(x) : false`. Compact may not have the
-`? :` operator — use `if (…) { … } else { … }`. With a `Set` (item 5) the
-whole body becomes `return verified.member(subjectId);`.
+| circuit | entrypoint(s) | witness(es) |
+|---|---|---|
+| threshold | `proveThreshold`, `isVerified` | `privateValue` |
+| membership | `proveMembership`, `addMember` | `memberSecret` |
+| expiry | `proveCredentialValid`, `registerCredential` | `credentialHash` |
 
-## 7. Witness names are load-bearing
+## Recompiling
 
-The `witness` names here must match the keys in
-`packages/midnightzap-sdk/src/live/witnesses.ts`:
+```
+compact compile compact/threshold_proof.compact   examples/ecommerce-age-gate/src/managed/threshold
+compact compile compact/membership_proof.compact  examples/forum-anon-login/src/managed/membership
+compact compile compact/expiry_proof.compact      examples/pharmacy-refill/src/managed/expiry
+```
 
-| circuit witness | witnesses.ts key |
-|---|---|
-| `privateValue` | `thresholdWitnesses.privateValue` |
-| `memberSecret`, `merkleProof` | `membershipWitnesses.*` |
-| `issuerPublicKey`, `issuerSignature`, `credentialHash`, `expiresAtUnix` | `expiryWitnesses.*` |
-
-If you rename a witness in the circuit, rename it there too, and update the
-private-state shape in `LiveMidnightBackend`'s `SPECS`.
-
-## 8. Circuit entrypoint names are load-bearing
-
-`proveThreshold`, `proveMembership`, `proveCredentialValid` are referenced
-by name in `LiveMidnightBackend` (`SPECS[kind].circuit`). Keep them, or
-update `SPECS`.
+The output (`contract/index.js`, `keys/`, `zkir/`) is checked in so the
+repo runs without the toolchain. `sync-managed.mjs` copies it into each
+example's `public/` on `predev` / `prebuild`.

@@ -1,0 +1,78 @@
+{
+  "manifest-version": "1",
+  "compiler-version": "0.34.0",
+  "language-version": "0.26.0",
+  "runtime-version": "0.19.0",
+  "compiler": {
+    "type": "directory",
+    "contract-info.json": {
+      "type": "file",
+      "size": 1395,
+      "hash": "8abe2f12751ae2400c64028e91594161ec510beeda87cb9cc7386c58bc219959"
+    }
+  },
+  "contract": {
+    "type": "directory",
+    "index.d.ts": {
+      "type": "file",
+      "size": 2277,
+      "hash": "7912a9aeba7e3afc93e12b676a5c2ef4a02a8ed6084519438802218bcac739ea"
+    },
+    "index.js": {
+      "type": "file",
+      "size": 33573,
+      "hash": "5ddfe4ac53bfee4fe132bcdb52e3c654319803267a1804e30579e60ef18d3101"
+    },
+    "index.js.map": {
+      "type": "file",
+      "size": 1228,
+      "hash": "3e2ddf69048863401676e2eb8e9f88c88266b1219ac025853ba17914fa1c4eaf"
+    }
+  },
+  "zkir": {
+    "type": "directory",
+    "addMember.bzkir": {
+      "type": "file",
+      "size": 100,
+      "hash": "4cbe7022421ff1fd23fc311b4af4706c5b8e8f6ce6da171161b85cebc038492a"
+    },
+    "addMember.zkir": {
+      "type": "file",
+      "size": 1422,
+      "hash": "9a9e06292c6f113526348d94d422d0a011c385bd92caa757e969e1778f709fb4"
+    },
+    "proveMembership.bzkir": {
+      "type": "file",
+      "size": 279,
+      "hash": "4a552c47d0f39795b0ed0b26dd821270880ff773e38f2420ef98c872a1d54344"
+    },
+    "proveMembership.zkir": {
+      "type": "file",
+      "size": 4507,
+      "hash": "65bc70896f917052d99423c661143b08bebb293466290a6405db832fcd0d119e"
+    }
+  },
+  "keys": {
+    "type": "directory",
+    "addMember.prover": {
+      "type": "file",
+      "size": 146733,
+      "hash": "a823150eab6dc148f948ca1e2e10eabe848e1d275e8e47e907e0debf1367a75f"
+    },
+    "addMember.verifier": {
+      "type": "file",
+      "size": 1351,
+      "hash": "24fb4ac5643d9a201de0ec0902a42c8485198166de0be1a0938abcecfbc3ca3d"
+    },
+    "proveMembership.prover": {
+      "type": "file",
+      "size": 5201141,
+      "hash": "8a97e6f4a6abb0948fa779e44edd09370147367fa86df8b790ba1368ac35cae6"
+    },
+    "proveMembership.verifier": {
+      "type": "file",
+      "size": 2119,
+      "hash": "7ecbd4ce24725adf739b7b9ad9ef45e7affe7f1958a96c22f3a6db20ec23c2c2"
+    }
+  }
+}

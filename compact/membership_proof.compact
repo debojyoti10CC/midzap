@@ -2,49 +2,46 @@
 //
 // MidnightZap template: MEMBERSHIP PROOF
 // ---------------------------------------
-// Proves that the caller belongs to a private, permissioned set (verified
-// employees, licensed professionals, alumni, DAO members, ...) without
-// revealing WHICH member they are. Uses a nullifier so the same
-// credential can't be replayed to appear as two different "anonymous"
-// members (e.g. to stuff a vote or post twice as "verified").
+// Proves the caller holds a credential in a permissioned set (verified
+// employees, licensed professionals, alumni, DAO members, ...) and issues
+// a per-action nullifier so the same credential can't be replayed to act
+// twice as two "different" anonymous members.
 //
-// Typical MidnightZap usage: <ProveMembership set="verified-employees" />,
-// useMembershipProof({ set: "licensed-therapists" })
+// This v1 checks the member commitment against an on-chain Set. That makes
+// it pseudonymous, not fully anonymous: the commitment (a hash of a
+// secret, never a name) is revealed, so repeat actions by the same member
+// are linkable. The fully-anonymous version swaps the Set for a Merkle
+// tree and proves membership with a witness path (merkleTreePathRoot) so
+// nothing per-member is disclosed — see compact/NOTES.md.
 //
-// NOTE: written against the Compact syntax documented at
-// docs.midnight.network (language_version 0.23). Verify against your
-// installed `compact` compiler before deploying.
+// Typical MidnightZap usage: <ProveMembership set="verified-employees" />
 
-pragma language_version 0.23;
+pragma language_version 0.26.0;
 import CompactStandardLibrary;
 
-// Root of a Merkle tree of member commitments, set by whoever operates
-// the membership list (an employer, a licensing board, a DAO). Rotating
-// this root is how you add/remove members without ever publishing the
-// member list itself.
-export ledger merkleRoot: Bytes<32>;
+// Member commitments = persistentHash(["member:", secret]). The operator
+// (employer / licensing board / DAO) adds one per member. A secret is
+// never revealed; the commitment is a one-way hash of it.
+export ledger members: Set<Bytes<32>>;
 
-// Spent nullifiers: prevents a single credential from generating more
-// than one "anonymous but verified" session for the same action.
-export ledger spentNullifiers: Map<Bytes<32>, Boolean>;
+// Spent nullifiers: one credential can prove membership again for a
+// different action, but cannot double-act within the same one.
+export ledger spentNullifiers: Set<Bytes<32>>;
 
 witness memberSecret(): Bytes<32>;
-witness merkleProof(): MerkleTreePath<32, Bytes<32>>;
 
-export circuit setMerkleRoot(newRoot: Bytes<32>): [] {
-  merkleRoot = disclose(newRoot);
+export circuit addMember(commitment: Bytes<32>): [] {
+  members.insert(disclose(commitment));
 }
 
 // actionTag scopes the nullifier to one action (e.g. "vote:proposal-12",
-// "post:thread-88") so the same member CAN prove membership again for a
-// different action, but CANNOT double-act within the same one.
+// "post:thread-88").
 export circuit proveMembership(actionTag: Bytes<32>): [] {
-  secret = memberSecret();
-  leaf = persistentHash<Vector<2, Bytes<32>>>([pad(32, "member:"), secret]);
-  proof = merkleProof();
-  assert(merkleTreePathRoot(proof, leaf) == merkleRoot, "Not a recognized member");
+  const secret = memberSecret();
+  const commitment = persistentHash<Vector<2, Bytes<32>>>([pad(32, "member:"), secret]);
+  assert(members.member(disclose(commitment)), "Not a recognized member");
 
-  nullifier = persistentHash<Vector<3, Bytes<32>>>([pad(32, "null:"), secret, actionTag]);
-  assert(!spentNullifiers.member(nullifier), "Credential already used for this action");
-  spentNullifiers.insert(disclose(nullifier), true);
+  const nullifier = persistentHash<Vector<3, Bytes<32>>>([pad(32, "null:"), secret, actionTag]);
+  assert(!spentNullifiers.member(disclose(nullifier)), "Credential already used for this action");
+  spentNullifiers.insert(disclose(nullifier));
 }

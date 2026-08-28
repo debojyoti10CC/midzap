@@ -1,18 +1,15 @@
 /**
- * Witness maps for the three predicate circuits.
+ * Witness maps for the three predicate circuits, matching the generated
+ * `Witnesses<PS>` types in each `managed/<circuit>/contract/index.d.ts`.
  *
- * In Compact a `witness foo(): T` is not a circuit argument — it is read
- * from the contract's private state at proving time. Each function here
- * returns `[nextPrivateState, value]`. MidnightZap seeds that private state
- * from the component's getter (`getPrivateValue` / `getMemberSecret` /
- * `getExpiresAtUnix`) immediately before the circuit call, on-device; the
- * value is consumed by the local prover and never transmitted.
- *
- * The shapes below must line up with the `witness` declarations in
- * `compact/*.compact`. If you change a template, change its map here.
+ * In Compact a `witness foo()` is read from the contract's private state at
+ * proving time; each function returns `[nextPrivateState, value]`.
+ * MidnightZap seeds that private state from the component's getter
+ * immediately before the circuit call, on-device — the value is consumed
+ * by the local prover and never transmitted.
  */
 
-/** Minimal local stand-in for `@midnight-ntwrk/midnight-js-types`' WitnessContext. */
+/** Local stand-in for `@midnight-ntwrk/compact-runtime`'s WitnessContext. */
 export interface WitnessCtx<PS> {
   privateState: PS;
 }
@@ -30,10 +27,8 @@ export const thresholdWitnesses = {
 };
 
 export interface MembershipPrivateState {
-  /** 32-byte member credential secret. */
+  /** 32-byte member credential secret. Its commitment must be in `members`. */
   readonly memberSecret: Uint8Array;
-  /** Merkle path from `memberSecret`'s leaf to the set's published root. */
-  readonly merklePath: unknown;
 }
 
 export const membershipWitnesses = {
@@ -41,32 +36,14 @@ export const membershipWitnesses = {
     privateState,
     privateState.memberSecret,
   ],
-  merkleProof: ({ privateState }: WitnessCtx<MembershipPrivateState>): [MembershipPrivateState, unknown] => [
-    privateState,
-    privateState.merklePath,
-  ],
 };
 
 export interface ExpiryPrivateState {
-  readonly expiresAtUnix: bigint;
-  readonly issuerPublicKey: Uint8Array;
-  readonly issuerSignature: Uint8Array;
+  /** 32-byte hash of the credential; must be registered in `issuedCredentials`. */
   readonly credentialHash: Uint8Array;
 }
 
 export const expiryWitnesses = {
-  expiresAtUnix: ({ privateState }: WitnessCtx<ExpiryPrivateState>): [ExpiryPrivateState, bigint] => [
-    privateState,
-    privateState.expiresAtUnix,
-  ],
-  issuerPublicKey: ({ privateState }: WitnessCtx<ExpiryPrivateState>): [ExpiryPrivateState, Uint8Array] => [
-    privateState,
-    privateState.issuerPublicKey,
-  ],
-  issuerSignature: ({ privateState }: WitnessCtx<ExpiryPrivateState>): [ExpiryPrivateState, Uint8Array] => [
-    privateState,
-    privateState.issuerSignature,
-  ],
   credentialHash: ({ privateState }: WitnessCtx<ExpiryPrivateState>): [ExpiryPrivateState, Uint8Array] => [
     privateState,
     privateState.credentialHash,

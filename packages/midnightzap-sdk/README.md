@@ -17,7 +17,7 @@ import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
 function App() {
   return (
     <MidnightZapProvider network="testnet" contracts={{
-      threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+      threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
     }}>
       <Checkout />
     </MidnightZapProvider>
@@ -116,7 +116,7 @@ const client = new MidnightZapClient({
   backend: new LiveMidnightBackend({
     network: "testnet",
     bindings: {
-      threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+      threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
     },
   }),
 });

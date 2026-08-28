@@ -51,6 +51,7 @@
   },
   "peerDependencies": {
     "react": ">=18",
+    "@midnight-ntwrk/compact-runtime": "*",
     "@midnight-ntwrk/dapp-connector-api": "*",
     "@midnight-ntwrk/midnight-js-contracts": "*",
     "@midnight-ntwrk/midnight-js-types": "*",
@@ -67,7 +68,8 @@
     "@midnight-ntwrk/midnight-js-level-private-state-provider": { "optional": true },
     "@midnight-ntwrk/midnight-js-indexer-public-data-provider": { "optional": true },
     "@midnight-ntwrk/midnight-js-http-client-proof-provider": { "optional": true },
-    "@midnight-ntwrk/midnight-js-fetch-zk-config-provider": { "optional": true }
+    "@midnight-ntwrk/midnight-js-fetch-zk-config-provider": { "optional": true },
+    "@midnight-ntwrk/compact-runtime": { "optional": true }
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

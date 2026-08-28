@@ -129,7 +129,7 @@ Full version in `docs/GO_LIVE.md`; the shape:
    import { MidnightZapProvider } from "@midnightzap/sdk/react";
 
    <MidnightZapProvider network="testnet" contracts={{
-     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
    }}>
      <App />
    </MidnightZapProvider>
@@ -199,11 +199,15 @@ from the example source.
   on your environment: the exact `@midnight-ntwrk/*` versions (field names
   on `serviceUriConfig()` / `wallet.state()` have drifted across releases)
   and the deployed contract addresses.
-- The `.compact` files are real Compact syntax based on official docs but
-  have **not** been run through `compactc` here — expect to fix stdlib
-  signatures on the first compile.
-- The checked-in `examples/**/managed/**/index.cjs` files are build
-  placeholders that *throw* if invoked. `compactc` overwrites them. They
-  are not proof mocks.
+- All three `.compact` files compile with the `compact` toolchain 0.34.0.
+  The compiled output (`examples/**/src/managed/`) is checked in so the
+  repo runs without the toolchain. `compact/NOTES.md` records the fixes the
+  first compile needed.
+- `membership` and `expiry` ship a **v1** circuit: membership checks a
+  member commitment against an on-chain `Set` (pseudonymous — repeat
+  actions by one member are linkable); expiry checks a credential hash
+  against an on-chain registry `Map`. The fully-anonymous Merkle versions
+  and the upgrade path are in `compact/NOTES.md`. `threshold` has no such
+  caveat.
 - `InMemoryProofBackend` runs the circuits' accept/reject *logic* for unit
   tests. It is not proof generation and not a way to run the app.

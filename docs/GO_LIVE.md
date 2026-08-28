@@ -26,24 +26,24 @@ npm i @midnight-ntwrk/midnight-js-contracts \
       @midnight-ntwrk/dapp-connector-api
 ```
 
-## 1. Compile the circuits
+## 1. Compile the circuits (already done — output is checked in)
+
+The compiled output lives at `examples/**/src/managed/` and is committed,
+so you can skip straight to deploy. Recompile only if you edit a template:
 
 ```bash
-compactc compile compact/threshold_proof.compact   examples/ecommerce-age-gate/src/managed/threshold
-compactc compile compact/membership_proof.compact  examples/forum-anon-login/src/managed/membership
-compactc compile compact/expiry_proof.compact      examples/pharmacy-refill/src/managed/expiry
+compact compile compact/threshold_proof.compact   examples/ecommerce-age-gate/src/managed/threshold
+compact compile compact/membership_proof.compact  examples/forum-anon-login/src/managed/membership
+compact compile compact/expiry_proof.compact      examples/pharmacy-refill/src/managed/expiry
 ```
 
-**Expect errors on the first pass.** The templates have never been through
-`compactc`. `compact/NOTES.md` lists the specific spots most likely to
-need a fix, in the order the compiler hits them (the `0.23` pragma,
-`verifySignature`, `disclose` on public args, Merkle helper signatures).
-The compiled output replaces the checked-in placeholder
-`managed/**/index.cjs` files (which only exist so the repo builds).
+All three compile with `compact` toolchain 0.34.0. `compact/NOTES.md`
+records the fixes the first compile needed and the membership/expiry v1
+simplification.
 
-The zk-params get copied into each example's `public/` automatically by a
+The zk-params are copied into each example's `public/` automatically by a
 `predev` / `prebuild` hook (`scripts/sync-managed.mjs`) — no manual copy
-step. Run it by hand any time with `npm run sync:managed -w ecommerce-age-gate`.
+step. Run it by hand with `npm run sync:managed -w ecommerce-age-gate`.
 
 ## 2. Deploy once
 
@@ -102,9 +102,9 @@ cp -r src/managed public/
 import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
 
 <MidnightZapProvider contracts={{
-  threshold:          { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
-  membership:         { address: "0x…", load: () => import("./managed/membership/contract/index.cjs") },
-  "credential-valid": { address: "0x…", load: () => import("./managed/expiry/contract/index.cjs") },
+  threshold:          { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
+  membership:         { address: "0x…", load: () => import("./managed/membership/contract/index.js") },
+  "credential-valid": { address: "0x…", load: () => import("./managed/expiry/contract/index.js") },
 }} network="testnet">
   <App />
 </MidnightZapProvider>

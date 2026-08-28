@@ -1,0 +1,78 @@
+{
+  "manifest-version": "1",
+  "compiler-version": "0.34.0",
+  "language-version": "0.26.0",
+  "runtime-version": "0.19.0",
+  "compiler": {
+    "type": "directory",
+    "contract-info.json": {
+      "type": "file",
+      "size": 1413,
+      "hash": "9e94e3710ab142846fd67a361164a3b6ffd48cb8f39704f76c22996d09ea05c5"
+    }
+  },
+  "contract": {
+    "type": "directory",
+    "index.d.ts": {
+      "type": "file",
+      "size": 2293,
+      "hash": "9db2e7f02b42a32de0123ccbfd00c06b7d06bff42e92a5ada316b95fb57beb3a"
+    },
+    "index.js": {
+      "type": "file",
+      "size": 27184,
+      "hash": "9a82ca1cf616cdff4ebbc583e1190076e75e1fefb56e02c2ec07b760b1f571e0"
+    },
+    "index.js.map": {
+      "type": "file",
+      "size": 1038,
+      "hash": "9a7d004c0e0b4aaff3761ee7b6b98191412967eed8946802e52b296024c1726a"
+    }
+  },
+  "zkir": {
+    "type": "directory",
+    "isVerified.bzkir": {
+      "type": "file",
+      "size": 195,
+      "hash": "e585ab02b8500e4252bcfb06241d3b0a30b9d99615b68309c64c028bb29aef40"
+    },
+    "isVerified.zkir": {
+      "type": "file",
+      "size": 3062,
+      "hash": "5b44773299df4f2f75fe0788ac00fd7c9d54497925f2bf964806d96e9aea4280"
+    },
+    "proveThreshold.bzkir": {
+      "type": "file",
+      "size": 127,
+      "hash": "a11548bc27c7c976bf6bebc2645895bcc88ee3fbc254343808ed8c65daeeaae6"
+    },
+    "proveThreshold.zkir": {
+      "type": "file",
+      "size": 1860,
+      "hash": "11782225ffe4962d22d2614ce374dc0c5089fbc3fbfb9655e60e4fe62b966a85"
+    }
+  },
+  "keys": {
+    "type": "directory",
+    "isVerified.prover": {
+      "type": "file",
+      "size": 147054,
+      "hash": "4998e486907c0c67366c162fbbdaf090d2364259c074e7dc3e7dd854bdf08be5"
+    },
+    "isVerified.verifier": {
+      "type": "file",
+      "size": 1351,
+      "hash": "ed0a155b9ce4892be2dd541495f9033ca9d75c0bdf076364ee29399b5332685d"
+    },
+    "proveThreshold.prover": {
+      "type": "file",
+      "size": 154591,
+      "hash": "213401de1c4e28d78c31a57b47ec7cc6fa60121d4591a2a7ccf32b220a5a0b9d"
+    },
+    "proveThreshold.verifier": {
+      "type": "file",
+      "size": 1351,
+      "hash": "04fb337c0f973b52b03e6e4409c4eddadc7d2a7c5a4fa21cbd8c8c57222b4b02"
+    }
+  }
+}

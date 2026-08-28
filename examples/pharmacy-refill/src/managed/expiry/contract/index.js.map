@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../../../../../",
+  "sources": ["compact/expiry_proof.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAiBA;;;;;;;;;;;;;MAQA,AAAA,kBAEC;;;;;cAFiC,MAAe;cAAE,eAAuB;;;;;;;;;;;;;;;;;;;;;;;;;yCAAxC,MAAe,+BAAE,eAAuB;;;;;;;;;0DAAxC,MAAe;0DAAE,eAAuB;;;;OAEzE;MAID,AAAA,oBAKC;;;;;cALmC,SAAiB;;;;;;;;;;;;;;;;;;yCAAjB,SAAiB;;;;;;;;;4DAAjB,SAAiB;;;;OAKpD;;;;;;;;;;GACA;EApBD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAIA;;;;;;;;;;yEAA0D;;;;;;;GAgBzD;EAdD,AAAA,iBAAoC;;0DAApC,cAAoC;;;;;;;;;;;;;;GAAA;EAEpC,AAAA,2BAEC,4BAFiC,MAAe,EAAE,eAAuB;;IACxE;;;;;;;;;;2HAAkC,MAAI;;;2HAAY,eAAa;;;wEAA9C;;GAClB;EAID,AAAA,6BAKC,4BALmC,SAAiB;UAC7C,GAA8B;oDAC7B;;;;;;;;;;;2KAAyB,GAAC;;;;yHAAT;;UAClB,QAAoC,2BAA3B;;;;;;;;;;;;;;wIAAyB,GAAC;;;kHAAT;4BACzB,QAAM,GAAG,SAAO;;GACxB;;;;;;;;;;;;;;;;IAfD;;;;;uCAAA;;;;;;;;;;;;;;;;4GAA0D;;;;;;uCAA1D;;;;;;;;;;;;4GAA0D;;;;;;;;;;;;;;uCAA1D;;;;;;;;;;;;;;;4GAA0D;;;;;;;;;;;;;;uCAA1D;;;;;;;;;;;;;;;;;4GAA0D;;;;;;;;;KAAA;;;;;;;;;;;;;;;"
+}

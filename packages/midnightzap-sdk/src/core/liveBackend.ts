@@ -64,16 +64,7 @@ const SPECS: Record<PredicateKind, CircuitSpec> = {
     circuit: "proveMembership",
     privateStateId: "mz-membership",
     witnesses: membershipWitnesses,
-    toPrivateState: (i) => {
-      if (i.merklePath == null) {
-        throw new Error(
-          "Live membership proofs need the caller's Merkle path. Pass it from " +
-            "<ProveMembership getExtraWitness={() => ({ merklePath })} /> — your " +
-            "set operator's tree service produces it from the member secret."
-        );
-      }
-      return { memberSecret: toBytes32(i.memberSecret), merklePath: i.merklePath };
-    },
+    toPrivateState: (i) => ({ memberSecret: toBytes32(i.memberSecret) }),
     publicArgs: async (req) => {
       if (req.predicate.kind !== "membership") return [];
       return [await sha256Bytes(`${req.predicate.set}:${req.predicate.actionTag}`)];
@@ -84,21 +75,16 @@ const SPECS: Record<PredicateKind, CircuitSpec> = {
     privateStateId: "mz-expiry",
     witnesses: expiryWitnesses,
     toPrivateState: (i) => {
-      for (const k of ["issuerPublicKey", "issuerSignature", "credentialHash"] as const) {
-        if (i[k] == null) {
-          throw new Error(
-            `Live credential proofs need \`${k}\` from the signed credential. Pass ` +
-              "them from <ProveCredentialValid getExtraWitness={() => ({ issuerPublicKey, " +
-              "issuerSignature, credentialHash })} />."
-          );
-        }
+      // v1 circuit: the private witness is the credential hash; its expiry
+      // is read from the on-chain registry. Pass the hash from
+      // <ProveCredentialValid getExtraWitness={() => ({ credentialHash })} />.
+      if (i.credentialHash == null) {
+        throw new Error(
+          "Live credential proofs need `credentialHash`. Pass it from " +
+            "<ProveCredentialValid getExtraWitness={() => ({ credentialHash })} />."
+        );
       }
-      return {
-        expiresAtUnix: BigInt(Number(i.expiresAtUnix)),
-        issuerPublicKey: toBytes32(i.issuerPublicKey),
-        issuerSignature: toBytes(i.issuerSignature),
-        credentialHash: toBytes32(i.credentialHash),
-      };
+      return { credentialHash: toBytes32(i.credentialHash) };
     },
     publicArgs: async () => [BigInt(Math.floor(Date.now() / 1000))],
   },

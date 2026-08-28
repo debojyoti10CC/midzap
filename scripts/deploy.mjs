@@ -1,8 +1,8 @@
 // One-time deploy of the three predicate contracts to a Midnight network.
 //
 // Prerequisites:
-//   1. compactc compile each template into <example>/src/managed/<circuit>
-//      (or a shared location you point `load` at).
+//   1. `compact compile` each template into <example>/src/managed/<circuit>
+//      (already done in this repo — the compiled output is checked in).
 //   2. npm i @midnight-ntwrk/midnight-js-contracts \
 //            @midnight-ntwrk/midnight-js-level-private-state-provider \
 //            @midnight-ntwrk/midnight-js-indexer-public-data-provider \
@@ -27,31 +27,30 @@ import {
 const TARGETS = [
   {
     name: "threshold",
-    module: "../examples/ecommerce-age-gate/src/managed/threshold/contract/index.cjs",
+    module: "../examples/ecommerce-age-gate/src/managed/threshold/contract/index.js",
     witnesses: thresholdWitnesses,
     privateStateId: "mz-threshold",
     initialPrivateState: { value: 0n },
   },
   {
     name: "membership",
-    module: "../examples/forum-anon-login/src/managed/membership/contract/index.cjs",
+    module: "../examples/forum-anon-login/src/managed/membership/contract/index.js",
     witnesses: membershipWitnesses,
     privateStateId: "mz-membership",
-    initialPrivateState: { memberSecret: new Uint8Array(32), merklePath: null },
+    initialPrivateState: { memberSecret: new Uint8Array(32) },
   },
   {
     name: "credential-valid",
-    module: "../examples/pharmacy-refill/src/managed/expiry/contract/index.cjs",
+    module: "../examples/pharmacy-refill/src/managed/expiry/contract/index.js",
     witnesses: expiryWitnesses,
     privateStateId: "mz-expiry",
-    initialPrivateState: {
-      expiresAtUnix: 0n,
-      issuerPublicKey: new Uint8Array(32),
-      issuerSignature: new Uint8Array(64),
-      credentialHash: new Uint8Array(32),
-    },
+    initialPrivateState: { credentialHash: new Uint8Array(32) },
   },
 ];
+
+// After deploy, register members / credentials with the operator circuits:
+//   membership: deployed.callTx.addMember(commitmentBytes32)
+//   expiry:     deployed.callTx.registerCredential(hashBytes32, expiresAtUnix)
 
 const { providers } = await configureProviders();
 

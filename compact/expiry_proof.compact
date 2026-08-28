@@ -2,47 +2,36 @@
 //
 // MidnightZap template: FRESHNESS / EXPIRY PROOF
 // ------------------------------------------------
-// Proves a credential (prescription, license, KYC check, insurance policy)
-// is currently valid — issued by a trusted issuer and not yet expired —
-// without revealing the issue date, expiry date, or credential contents.
+// Proves a credential (prescription, licence, KYC check, insurance policy)
+// is currently valid — registered by a trusted issuer and not yet expired
+// — without revealing the credential's contents.
+//
+// v1: the issuer registers each credential as (credentialHash -> expiry)
+// in an on-chain Map. The proof reveals the credentialHash (a one-way hash,
+// never the document, name, prescriber, or dates) and proves its recorded
+// expiry is still in the future. Fully-hidden version: keep the registry
+// in a Merkle tree and prove inclusion + expiry with a witness path — see
+// compact/NOTES.md.
 //
 // Typical MidnightZap usage: <ProveCredentialValid issuer="pharmacy-board" />
-//
-// NOTE: written against the Compact syntax documented at
-// docs.midnight.network (language_version 0.23). Verify against your
-// installed `compact` compiler before deploying.
 
-pragma language_version 0.23;
+pragma language_version 0.26.0;
 import CompactStandardLibrary;
 
-// Public keys of trusted issuers (a licensing board, a pharmacy network,
-// a KYC provider). The app operator manages this list; MidnightZap never
-// needs to see or store the credential documents themselves.
-export ledger trustedIssuers: Map<Bytes<32>, Boolean>;
+// credentialHash -> expiry (unix seconds), written by the trusted issuer.
+export ledger issuedCredentials: Map<Bytes<32>, Uint<64>>;
 
-witness issuerPublicKey(): Bytes<32>;
-witness issuerSignature(): Bytes<64>;
 witness credentialHash(): Bytes<32>;
-witness expiresAtUnix(): Uint<64>;
 
-export circuit addTrustedIssuer(issuerKey: Bytes<32>): [] {
-  trustedIssuers.insert(disclose(issuerKey), true);
+export circuit registerCredential(hash: Bytes<32>, expiresAtUnix: Uint<64>): [] {
+  issuedCredentials.insert(disclose(hash), disclose(expiresAtUnix));
 }
 
-// `nowUnix` is supplied by the calling app from the current block/ledger
-// time, kept public since "what time is it" is not sensitive.
+// `nowUnix` is supplied by the calling app from current ledger/block time;
+// "what time is it" is not sensitive, so it stays public.
 export circuit proveCredentialValid(nowUnix: Uint<64>): [] {
-  issuer = issuerPublicKey();
-  assert(trustedIssuers.member(issuer) && trustedIssuers.lookup(issuer),
-    "Issuer is not trusted");
-
-  sig = issuerSignature();
-  hash = credentialHash();
-  assert(verifySignature(issuer, hash, sig), "Invalid issuer signature");
-
-  expiry = expiresAtUnix();
+  const h = disclose(credentialHash());
+  assert(issuedCredentials.member(h), "Unknown or untrusted credential");
+  const expiry = issuedCredentials.lookup(h);
   assert(expiry > nowUnix, "Credential has expired");
-  // Nothing about the credential's contents, issue date, or exact expiry
-  // is disclosed — only the fact that a validly-signed, unexpired
-  // credential was presented.
 }

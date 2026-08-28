@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../../../../../",
+  "sources": ["compact/membership_proof.compact", "compiler/zkir-v3-library.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAkBA;;;;;;;;;;;;;MAcA,AAAA,SAEC;;;;;cAFwB,YAAqB;;;;;;;;;;;;;;;;;;yCAArB,YAAqB;;;;;;;;;iDAArB,YAAqB;;;;OAE7C;MAID,AAAA,eAQC;;;;;cAR8B,WAAoB;;;;;;;;;;;;;;;;;;yCAApB,WAAoB;;;;;;;;;uDAApB,WAAoB;;;;OAQlD;;;;;;;;;;GACA;EA7BD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAMA;;;;;;;;;;yEAAsC;IAItC;;;;;;;;;;yEAA8C;;;;;;;GAmB7C;EC/CD,AAAA,kBAAA;oEAAA;;;EAAA,AAAA,kBAAA;oEAAA;;;ED8BA,AAAA,eAAkC;;0DAAlC,YAAkC;;;;;;;;;;;;;;GAAA;EAElC,AAAA,kBAEC,4BAFwB,YAAqB;IAC5C;;;;;;;;;;2HAAwB,YAAU;;;;;wEAA3B;;GACR;EAID,AAAA,wBAQC,4BAR8B,WAAoB;UAC3C,QAAuB;UACvB,YAA+E;iDAAR,QAAM;oDAC5E;;;;;;;;;;;2KAAwB,YAAU;;;;yHAA3B;;UAER,WAAuF;gDAAnB,QAAM;gDAAE,WAAS;qDACnF;;;;;;;;;;;4KAAgC,WAAS;;;;0HAA1B;;IACvB;;;;;;;;;;2HAAgC,WAAS;;;;;wEAA1B;;GAChB;;;;;;;;;;;;;;;;IAtBD;;;;;uCAAA;;;;;;;;;;;;;;;;4GAAsC;;;;;;uCAAtC;;;;;;;;;;;;4GAAsC;;;;;;;;;;;;;;uCAAtC;;;;;;;;;;;;;;;4GAAsC;;;;;;;;;KAAA;IAItC;;;;;uCAAA;;;;;;;;;;;;;;;;4GAA8C;;;;;;uCAA9C;;;;;;;;;;;;4GAA8C;;;;;;;;;;;;;;uCAA9C;;;;;;;;;;;;;;;4GAA8C;;;;;;;;;KAAA;;;;;;;;;;;;;;;"
+}

@@ -64,7 +64,7 @@ configured from the provider's `contracts` prop:
 
 ```tsx
 <MidnightZapProvider network="testnet" contracts={{
-  threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+  threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
 }}>
 ```
 

@@ -68,7 +68,7 @@ export interface ProofResult {
  *
  *   {
  *     address: "0x…",                                     // from your one-time deploy
- *     load: () => import("./managed/threshold/contract/index.cjs"),
+ *     load: () => import("./managed/threshold/contract/index.js"),
  *   }
  */
 export interface ContractBinding {

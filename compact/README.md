@@ -29,9 +29,9 @@ hand the addresses to `<MidnightZapProvider>`:
 
 ```tsx
 <MidnightZapProvider network="testnet" contracts={{
-  threshold:          { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
-  membership:         { address: "0x…", load: () => import("./managed/membership/contract/index.cjs") },
-  "credential-valid": { address: "0x…", load: () => import("./managed/expiry/contract/index.cjs") },
+  threshold:          { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
+  membership:         { address: "0x…", load: () => import("./managed/membership/contract/index.js") },
+  "credential-valid": { address: "0x…", load: () => import("./managed/expiry/contract/index.js") },
 }}>
 ```
 

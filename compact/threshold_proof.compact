@@ -15,7 +15,7 @@
 // Compact is a young, fast-moving language and exact stdlib signatures
 // (persistentHash, disclose, etc.) may shift between releases.
 
-pragma language_version 0.23;
+pragma language_version 0.26.0;
 import CompactStandardLibrary;
 
 // Public ledger state: one boolean per subject commitment, set true once
@@ -35,11 +35,12 @@ witness privateValue(): Uint<64>;
 // commitment to mark as verified. The private value never appears in
 // either the call nor the resulting transaction.
 export circuit proveThreshold(subjectId: Bytes<32>, threshold: Uint<64>): [] {
-  value = privateValue();
+  const value = privateValue();
   assert(value >= threshold, "Value does not meet required threshold");
   verified.insert(disclose(subjectId), true);
 }
 
 export circuit isVerified(subjectId: Bytes<32>): Boolean {
-  return verified.member(subjectId) ? verified.lookup(subjectId) : false;
+  const key = disclose(subjectId);
+  return verified.member(key) ? verified.lookup(key) : false;
 }

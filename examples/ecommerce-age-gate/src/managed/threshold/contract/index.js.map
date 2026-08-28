@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../../../../../",
+  "sources": ["compact/threshold_proof.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAiBA;;;;;;;;;;;;;MAmBA,AAAA,cAIC;;;;;cAJ6B,WAAoB;cAAE,WAAmB;;;;;;;;;;;;;;;;;;;;;;;;;yCAAzC,WAAoB,+BAAE,WAAmB;;;;;;;;;sDAAzC,WAAoB;sDAAE,WAAmB;;;;OAItE;MAED,AAAA,UAGC;;;;;cAHyB,WAAoB;;;;;;;;;;;;;;;;;;yCAApB,WAAoB;;;;;;;;;kDAApB,WAAoB;;;;OAG7C;;;;;;;;;;GACA;EA7BD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAQA;;;;;;;;;;yEAAgD;;;;;;;GAqB/C;EAhBD,AAAA,eAAiC;;0DAAjC,YAAiC;;;;;;;;;;;;;;GAAA;EAMjC,AAAA,uBAIC,4BAJ6B,WAAoB,EAAE,WAAmB;UAC/D,OAAsB;4BACrB,OAAK,IAAI,WAAS;;IACzB;;;;;;;;;;2HAAyB,WAAS;;;;;;wEAA1B;;GACT;EAED,AAAA,mBAGC,4BAHyB,WAAoB;UACtC,KAAyB,GAAV,WAAS;mCACvB;;;;;;;;;;;0JAAgB,KAAG;;;;wGAAX;;mCAAe;;;;;;;;;;;;;;8HAAgB,KAAG;;;wGAAX;GACvC;;;;;;;;;;;;;;;;IApBD;;;;;uCAAA;;;;;;;;;;;;;;;;4GAAgD;;;;;;uCAAhD;;;;;;;;;;;;4GAAgD;;;;;;;;;;;;;;uCAAhD;;;;;;;;;;;;;;;4GAAgD;;;;;;;;;;;;;;uCAAhD;;;;;;;;;;;;;;;;;4GAAgD;;;;;;;;;KAAA;;;;;;;;;;;;;;;"
+}

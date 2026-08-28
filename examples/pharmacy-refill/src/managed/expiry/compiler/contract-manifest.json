@@ -1,0 +1,78 @@
+{
+  "manifest-version": "1",
+  "compiler-version": "0.34.0",
+  "language-version": "0.26.0",
+  "runtime-version": "0.19.0",
+  "compiler": {
+    "type": "directory",
+    "contract-info.json": {
+      "type": "file",
+      "size": 1500,
+      "hash": "99a382cfb62535faed0e538bcb3cc00d12ef7318e0985b31d654ee2252bd47db"
+    }
+  },
+  "contract": {
+    "type": "directory",
+    "index.d.ts": {
+      "type": "file",
+      "size": 2366,
+      "hash": "be939cb43c1aeb27c09e4c19d8b78196f2740c9597ba7c951ecfe33edbb37a92"
+    },
+    "index.js": {
+      "type": "file",
+      "size": 27752,
+      "hash": "a7b8c958be51f82d16c020707f890764b33372af799c3ce3f9f2b8ce5368ad01"
+    },
+    "index.js.map": {
+      "type": "file",
+      "size": 1034,
+      "hash": "73f69f00e24154248b1d50c66a8772eb03d008a8d3e31fa36147de53d51108cb"
+    }
+  },
+  "zkir": {
+    "type": "directory",
+    "proveCredentialValid.bzkir": {
+      "type": "file",
+      "size": 171,
+      "hash": "914f013478b5658e9079648ede2fb7d745bbdf21ea8183fd150e82b28a7ada2c"
+    },
+    "proveCredentialValid.zkir": {
+      "type": "file",
+      "size": 2785,
+      "hash": "5fe3442d19a8e5b7cc4b11707d75e05b16960d20028835a0f402975718665e18"
+    },
+    "registerCredential.bzkir": {
+      "type": "file",
+      "size": 112,
+      "hash": "3e2d9e88dc5d78a8ea58d25efaf226c5ecf15d55251602c12e585a8e7ba282b7"
+    },
+    "registerCredential.zkir": {
+      "type": "file",
+      "size": 1652,
+      "hash": "2bee9654ca0d786200beacef2c14c75095b5df66b607c4f1a64f649e8e6d8dad"
+    }
+  },
+  "keys": {
+    "type": "directory",
+    "proveCredentialValid.prover": {
+      "type": "file",
+      "size": 154568,
+      "hash": "b6ad5ac026ab9d09a7d5f4628918608eef970bf9b637582f913d36e91088bd5c"
+    },
+    "proveCredentialValid.verifier": {
+      "type": "file",
+      "size": 1351,
+      "hash": "7f7f7a62e29276e4e4615081dba5d2deb3a09bb75728f2674e2ea5c038fad3d8"
+    },
+    "registerCredential.prover": {
+      "type": "file",
+      "size": 146826,
+      "hash": "11841a57d5699d3a83c3e5c05eddcbe2c9b414c0bb0cf317e9a65a9c4aa94416"
+    },
+    "registerCredential.verifier": {
+      "type": "file",
+      "size": 1351,
+      "hash": "0d0ea59df26e9be20a2a5a9ed031604bca4202277bb8070f4e017ed69c2f1691"
+    }
+  }
+}

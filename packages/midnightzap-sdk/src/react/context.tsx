@@ -26,7 +26,7 @@ export interface MidnightZapProviderProps {
    * output:
    *
    *   contracts={{
-   *     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+   *     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
    *   }}
    *
    * Ignored when `backend` is set. See docs/GO_LIVE.md.
@@ -53,7 +53,7 @@ export interface MidnightZapProviderProps {
  *   import { MidnightZapProvider } from "@midnightzap/sdk/react";
  *
  *   <MidnightZapProvider contracts={{
- *     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.cjs") },
+ *     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
  *   }}>
  *     <App />
  *   </MidnightZapProvider>
