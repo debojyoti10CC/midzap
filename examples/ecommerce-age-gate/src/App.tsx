@@ -8,12 +8,10 @@ import { MidnightZapProvider, ProveThreshold } from "@midzap/sdk/react";
 import { InMemoryProofBackend } from "@midzap/sdk";
 import { contracts } from "./midnight.js";
 
-// The @midnight-ntwrk browser runtime (WASM onchain-runtime + top-level
-// await) does not bundle in a stock Vite app yet — see the @midzap/sdk README.
-// So this demo runs the *predicate logic* locally via InMemoryProofBackend
-// to show the integration + UX. Once you've set up Midnight's dApp Vite
-// baseline and deployed the contracts, run with VITE_MZ_LIVE=1 to use the
-// real LiveMidnightBackend (the SDK's default) instead.
+// vite.config.ts already bundles the real @midnight-ntwrk WASM runtime.
+// This still defaults to InMemoryProofBackend so the demo runs the predicate
+// logic locally without a wallet or a deployed contract. Once you have both,
+// run with VITE_MZ_LIVE=1 to use the real LiveMidnightBackend (the default).
 const LIVE = Boolean((import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MZ_LIVE);
 const backend = LIVE ? undefined : new InMemoryProofBackend();
 

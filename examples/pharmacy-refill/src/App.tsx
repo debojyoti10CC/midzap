@@ -10,9 +10,9 @@ import { MidnightZapProvider, ProveCredentialValid } from "@midzap/sdk/react";
 import { InMemoryProofBackend } from "@midzap/sdk";
 import { contracts } from "./midnight.js";
 
-// See ecommerce-age-gate/src/App.tsx: @midnight-ntwrk browser runtime
-// doesn't bundle in stock Vite yet. Local preview = predicate logic
-// in-browser; VITE_MZ_LIVE=1 = real backend.
+// vite.config.ts bundles the real @midnight-ntwrk runtime; this still
+// defaults to InMemoryProofBackend (no wallet / deployed contract needed).
+// Run with VITE_MZ_LIVE=1 once you have both.
 const LIVE = Boolean((import.meta as unknown as { env?: Record<string, string> }).env?.VITE_MZ_LIVE);
 const backend = LIVE ? undefined : new InMemoryProofBackend();
 

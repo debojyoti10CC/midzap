@@ -205,11 +205,12 @@ compiles the result**.
   pseudonymous; the fully-anonymous Merkle upgrade is noted in
   [`compact/README.md`](compact/README.md).
 - **Live, in a browser** — `LiveMidnightBackend` is complete (wallet
-  discovery → providers → circuit call → submit). The `@midnight-ntwrk`
-  runtime is WASM + top-level-await and needs a WASM-aware bundler config
-  ([`@midzap/sdk` README](packages/midnightzap-sdk/README.md) → *Real proofs
-  on Midnight*); until that's wired, `InMemoryProofBackend` runs the same
-  predicate logic locally with no setup.
+  discovery → providers → circuit call → submit), and the `@midnight-ntwrk`
+  WASM runtime **bundles** — `npx @midzap/cli add …` writes the
+  `vite-plugin-wasm` + node-polyfills + `isomorphic-ws` config, and all
+  four example apps build with it. The only steps left for a real proof are
+  operational: a Midnight wallet + a deployed contract address. Until then,
+  `InMemoryProofBackend` runs the same predicate logic locally.
 
 ---
 

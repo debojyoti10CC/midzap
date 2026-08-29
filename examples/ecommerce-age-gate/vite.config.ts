@@ -1,17 +1,36 @@
 import { defineConfig } from "vite";
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
+import wasm from "vite-plugin-wasm";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
-// NOTE: the @midnight-ntwrk browser stack (WASM onchain-runtime + top-level
-// await + node builtins + a WebSocket shim) does not bundle in a stock Vite
-// setup. It is marked external here so this repo builds; a real deployment
-// needs Midnight's example-dApp Vite config (vite-plugin-wasm +
-// vite-plugin-top-level-await + vite-plugin-node-polyfills + a
-// resolve.alias for isomorphic-ws). See the @midzap/sdk README.
-const midnightExternal = /^@midnight-?ntwrk\//;
-
+// Bundling the @midnight-ntwrk live stack in a browser needs: WASM support
+// (the onchain-runtime is wasm-bindgen), Node builtin shims, a real
+// `WebSocket` for `isomorphic-ws`, and the WASM packages kept out of the
+// esbuild dep pre-bundler. `esnext` targets give native top-level await, so
+// the flaky vite-plugin-top-level-await isn't needed.
 export default defineConfig({
-  plugins: [react()],
+  plugins: [wasm(), nodePolyfills(), react()],
   server: { port: 5173 },
-  optimizeDeps: { exclude: ["@midzap/sdk"] },
-  build: { rollupOptions: { external: [midnightExternal] } },
+  resolve: {
+    alias: {
+      "isomorphic-ws": fileURLToPath(new URL("./src/ws-shim.ts", import.meta.url)),
+    },
+  },
+  optimizeDeps: {
+    exclude: [
+      "@midzap/sdk",
+      "@midnight-ntwrk/compact-runtime",
+      "@midnightntwrk/onchain-runtime-v4",
+      "@midnight-ntwrk/midnight-js-contracts",
+      "@midnight-ntwrk/midnight-js-types",
+      "@midnight-ntwrk/midnight-js-level-private-state-provider",
+      "@midnight-ntwrk/midnight-js-indexer-public-data-provider",
+      "@midnight-ntwrk/midnight-js-http-client-proof-provider",
+      "@midnight-ntwrk/midnight-js-fetch-zk-config-provider",
+      "@midnight-ntwrk/dapp-connector-api",
+    ],
+  },
+  build: { target: "esnext" },
+  esbuild: { target: "esnext" },
 });

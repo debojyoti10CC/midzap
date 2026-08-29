@@ -42,6 +42,13 @@ export function addDependency(pkg: Record<string, any>, name: string, version: s
   return true;
 }
 
+export function addDevDependency(pkg: Record<string, any>, name: string): boolean {
+  pkg.devDependencies ??= {};
+  if (pkg.devDependencies[name] || pkg.dependencies?.[name]) return false;
+  pkg.devDependencies[name] = "latest";
+  return true;
+}
+
 /** Add named imports from `mod`, merging into an existing import if present. */
 export function ensureImport(src: string, mod: string, names: string[]): string {
   const re = new RegExp(`import\\s*\\{([^}]*)\\}\\s*from\\s*["']${mod.replace(/[/\\]/g, "\\$&")}["'];?`);

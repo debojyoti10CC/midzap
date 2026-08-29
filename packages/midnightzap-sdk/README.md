@@ -155,10 +155,41 @@ Deploy each once with your Midnight deploy flow; keep the addresses.
 **3. Bundling for the browser**
 
 `@midnight-ntwrk/compact-runtime` pulls a Rust→WASM runtime and the indexer
-provider uses `isomorphic-ws`. A stock bundler can't handle this — you need
-`vite-plugin-wasm`, `vite-plugin-top-level-await`, `vite-plugin-node-polyfills`,
-and a `WebSocket` alias for `isomorphic-ws`. The simplest path is to start
-from a current Midnight example dApp's build config.
+provider imports `isomorphic-ws`. `npx @midzap/cli add …` writes a working
+`vite.config.ts` + `src/ws-shim.ts` for you. The essentials:
+
+```ts
+import { defineConfig } from "vite";
+import { fileURLToPath } from "node:url";
+import react from "@vitejs/plugin-react";
+import wasm from "vite-plugin-wasm";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+
+export default defineConfig({
+  plugins: [wasm(), nodePolyfills(), react()],
+  resolve: {
+    alias: {
+      "isomorphic-ws": fileURLToPath(new URL("./src/ws-shim.ts", import.meta.url)),
+    },
+  },
+  optimizeDeps: {
+    exclude: [
+      "@midzap/sdk", "@midnight-ntwrk/compact-runtime", "@midnightntwrk/onchain-runtime-v4",
+      "@midnight-ntwrk/midnight-js-contracts", "@midnight-ntwrk/midnight-js-types",
+      "@midnight-ntwrk/midnight-js-level-private-state-provider",
+      "@midnight-ntwrk/midnight-js-indexer-public-data-provider",
+      "@midnight-ntwrk/midnight-js-http-client-proof-provider",
+      "@midnight-ntwrk/midnight-js-fetch-zk-config-provider",
+      "@midnight-ntwrk/dapp-connector-api",
+    ],
+  },
+  build: { target: "esnext" },     // native top-level await
+  esbuild: { target: "esnext" },
+});
+```
+
+`src/ws-shim.ts` is a two-line re-export of the browser `WebSocket`.
+`esnext` targets cover top-level await, so no `vite-plugin-top-level-await`.
 
 **4. Point the provider at your contracts**
 
