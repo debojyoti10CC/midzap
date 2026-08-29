@@ -1,7 +1,7 @@
-// AFTER — same checkout, now with a real zero-knowledge age gate instead of
+// An e-commerce checkout with a real zero-knowledge age gate instead of
 // a self-reported checkbox. The whole integration: wrap the tree in
 // <MidnightZapProvider> and put the gated button inside <ProveThreshold>.
-// Nothing else changes. Literal unified diff: docs/ecommerce.diff.txt.
+// Nothing else about the checkout changes.
 
 import React, { useState } from "react";
 import { MidnightZapProvider, ProveThreshold } from "@midzap/sdk/react";
@@ -9,7 +9,7 @@ import { InMemoryProofBackend } from "@midzap/sdk";
 import { contracts } from "./midnight.js";
 
 // The @midnight-ntwrk browser runtime (WASM onchain-runtime + top-level
-// await) does not bundle in a stock Vite app yet — see docs/GO_LIVE.md.
+// await) does not bundle in a stock Vite app yet — see the @midzap/sdk README.
 // So this demo runs the *predicate logic* locally via InMemoryProofBackend
 // to show the integration + UX. Once you've set up Midnight's dApp Vite
 // baseline and deployed the contracts, run with VITE_MZ_LIVE=1 to use the
@@ -59,7 +59,7 @@ export function App() {
       {!LIVE && (
         <p style={{ fontSize: 12, color: "#999", marginTop: 20 }}>
           Local preview — predicate logic runs in-browser. Real Midnight
-          proofs: see docs/GO_LIVE.md, then <code>VITE_MZ_LIVE=1</code>.
+          proofs: see the @midzap/sdk README, then <code>VITE_MZ_LIVE=1</code>.
         </p>
       )}
     </MidnightZapProvider>

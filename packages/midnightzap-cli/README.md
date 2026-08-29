@@ -52,4 +52,4 @@ The app runs immediately in a **local preview** (the predicate logic runs
 in-browser). For real proofs on Midnight: deploy the circuit, set the
 address in `src/midnight.ts`, finish the Vite setup, and run with
 `VITE_MZ_LIVE=1`. See
-[GO_LIVE.md](https://github.com/debojyoti10CC/midzap/blob/main/docs/GO_LIVE.md).
+[the @midzap/sdk README](https://www.npmjs.com/package/@midzap/sdk).

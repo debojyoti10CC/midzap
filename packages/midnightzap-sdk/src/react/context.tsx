@@ -29,7 +29,7 @@ export interface MidnightZapProviderProps {
    *     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
    *   }}
    *
-   * Ignored when `backend` is set. See docs/GO_LIVE.md.
+   * Ignored when `backend` is set. See the @midzap/sdk README.
    */
   contracts?: ContractBindings;
   /** Passed to the default `LiveMidnightBackend`. Informational. */
@@ -59,7 +59,7 @@ export interface MidnightZapProviderProps {
  *   </MidnightZapProvider>
  *
  * Real proofs against Midnight. The one-time compile + deploy that
- * produces those addresses is in docs/GO_LIVE.md.
+ * produces those addresses is in the @midzap/sdk README.
  */
 export function MidnightZapProvider({
   backend,

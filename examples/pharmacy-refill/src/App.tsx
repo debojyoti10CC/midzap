@@ -1,10 +1,9 @@
-// AFTER — same refill flow, now with a zero-knowledge "credential valid"
+// A pharmacy refill flow with a zero-knowledge "credential valid"
 // proof instead of a document upload. The customer proves their
 // prescription was issued by a trusted prescriber and hasn't expired —
 // the pharmacy never receives the document, the name, the prescriber, or
 // the dates. The whole integration: wrap the tree in <MidnightZapProvider>
 // and put the refill button inside <ProveCredentialValid>.
-// Literal unified diff: docs/pharmacy.diff.txt.
 
 import React, { useState } from "react";
 import { MidnightZapProvider, ProveCredentialValid } from "@midzap/sdk/react";
@@ -65,7 +64,7 @@ export function App() {
       {!LIVE && (
         <p style={{ fontSize: 12, color: "#999", marginTop: 20 }}>
           Local preview — predicate logic runs in-browser. Real Midnight
-          proofs: see docs/GO_LIVE.md, then <code>VITE_MZ_LIVE=1</code>.
+          proofs: see the @midzap/sdk README, then <code>VITE_MZ_LIVE=1</code>.
         </p>
       )}
     </MidnightZapProvider>

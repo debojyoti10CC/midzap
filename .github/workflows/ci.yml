@@ -19,10 +19,10 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Build SDK
-        run: npm run build:sdk
+      - name: Build SDK + CLI
+        run: npm run build:sdk && npm run build:cli
 
-      - name: Typecheck (SDK + all example integrations)
+      - name: Typecheck
         run: npm run typecheck
 
       - name: Predicate smoke test
@@ -31,7 +31,5 @@ jobs:
       - name: Build example integrations
         run: npm run build:examples
 
-      - name: Diffs are in sync with example source
-        run: |
-          node scripts/gen-diffs.mjs
-          git diff --exit-code -- docs/ecommerce.diff.txt docs/forum.diff.txt docs/pharmacy.diff.txt
+      - name: CLI end-to-end (convert a plain app, build the result)
+        run: node scripts/cli-e2e.mjs

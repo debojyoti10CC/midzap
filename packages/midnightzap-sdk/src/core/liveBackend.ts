@@ -34,7 +34,7 @@ import {
  *      the private input never leaves the device.
  *   5. submit, await finality, return the tx id as the receipt.
  *
- * Prerequisites (one-time — see compact/README.md and docs/GO_LIVE.md):
+ * Prerequisites (one-time — see compact/README.md and the @midzap/sdk README):
  *   - `compactc compile` each template, copy `managed/<circuit>/` into your
  *     app's `public/`.
  *   - deploy each contract once; put the addresses in `bindings`.
@@ -130,7 +130,7 @@ export class LiveMidnightBackend implements ProofBackend {
         `No deployed contract configured for the "${kind}" predicate. Compile ` +
           `compact/${templateFile(kind)} with \`compactc\`, deploy it once, and pass ` +
           `<MidnightZapProvider contracts={{ "${kind}": { address, load } }}>. ` +
-          `See docs/GO_LIVE.md.`
+          `See the @midzap/sdk README.`
       );
     }
 

@@ -37,12 +37,21 @@ hand the addresses to `<MidnightZapProvider>`:
 
 The circuit entrypoint names (`proveThreshold`, `proveMembership`,
 `proveCredentialValid`) and witness maps are baked into the SDK — you only
-supply the address and the compiled-module `load`. Full walkthrough:
-`docs/GO_LIVE.md`.
+supply the address and the compiled-module `load`. Full walkthrough: the
+**Real proofs on Midnight** section of the
+[`@midzap/sdk` README](../packages/midnightzap-sdk/README.md).
 
 ## Status
 
-Written to the documented Compact syntax but **not** yet run through the
-compiler. `NOTES.md` in this folder lists the specific spots most likely to
-need a fix on the first `compactc compile`, in the order the compiler hits
-them. Treat a clean compile as step one of any real deployment.
+All three compile with the `compact` toolchain **0.34.0**; the compiled
+output is checked in under `examples/*/src/managed/`, so nothing here needs
+a toolchain to run.
+
+`threshold` is fully private — the value is proven against the threshold
+and never disclosed. `membership` and `expiry` ship a **v1** that checks a
+member commitment / credential hash against an on-chain `Set` / `Map`; that
+is pseudonymous (repeat actions by one holder are linkable). The
+fully-anonymous version keeps only a Merkle root on-chain and proves
+inclusion with a witness path (`merkleTreePathRoot`) — swap the ledger
+type, add `witness merkleProof()`, and pass the path via
+`getExtraWitness`.

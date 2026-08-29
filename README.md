@@ -2,7 +2,7 @@
 
 # MidnightZap — zero-knowledge privacy in your app in minutes
 
-<img width="1200" height="675" alt="Bring" src="https://github.com/user-attachments/assets/4637d774-de30-4691-b0be-c678db5e0417" />
+<img width="1200" alt="MidnightZap" src="https://github.com/user-attachments/assets/4637d774-de30-4691-b0be-c678db5e0417" />
 
 [![@midzap/sdk](https://img.shields.io/npm/v/@midzap/sdk?label=%40midzap%2Fsdk&color=16213e)](https://www.npmjs.com/package/@midzap/sdk)
 [![@midzap/cli](https://img.shields.io/npm/v/@midzap/cli?label=%40midzap%2Fcli&color=16213e)](https://www.npmjs.com/package/@midzap/cli)
@@ -28,11 +28,9 @@ zero-knowledge gate.
 Works on **web** — React + Vite, Next.js, CRA. The CLI runs against any
 React/TypeScript project.
 
-- **CLI reference:** [`packages/midnightzap-cli/README.md`](packages/midnightzap-cli/README.md)
-- **SDK reference:** [`packages/midnightzap-sdk/README.md`](packages/midnightzap-sdk/README.md)
-- **Architecture:** [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-- **Going live on Midnight:** [`docs/GO_LIVE.md`](docs/GO_LIVE.md)
-- **Demo-video script:** [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md)
+- **CLI reference:** [`@midzap/cli`](packages/midnightzap-cli/README.md) · [npm](https://www.npmjs.com/package/@midzap/cli)
+- **SDK reference:** [`@midzap/sdk`](packages/midnightzap-sdk/README.md) · [npm](https://www.npmjs.com/package/@midzap/sdk)
+- **Circuits:** [`compact/README.md`](compact/README.md)
 
 ---
 
@@ -90,7 +88,8 @@ npm install @midnight-ntwrk/compact-runtime @midnight-ntwrk/dapp-connector-api \
 npm install -D vite-plugin-wasm vite-plugin-top-level-await vite-plugin-node-polyfills
 ```
 
-Full walkthrough: [`docs/GO_LIVE.md`](docs/GO_LIVE.md).
+Full walkthrough: the **Real proofs on Midnight** section of the
+[`@midzap/sdk` README](packages/midnightzap-sdk/README.md).
 
 ---
 
@@ -180,15 +179,14 @@ Swapping between them changes one prop. Nothing else in the app changes.
 ```
 packages/midnightzap-cli/     Codemod CLI — recipes: age-gate / anon-login / credential-check
 packages/midnightzap-sdk/     SDK — framework-agnostic core + React layer + backends
-compact/                      Three Compact circuit templates + NOTES.md (compile log)
-examples/plain-shop/          A pristine web2 checkout — the CLI's "before"
-examples/ecommerce-age-gate/  BEFORE/AFTER: checkbox age-gate → ProveThreshold
-examples/forum-anon-login/    BEFORE/AFTER: real-name login → ProveMembership
-examples/pharmacy-refill/     BEFORE/AFTER: prescription upload → ProveCredentialValid
+compact/                      Three Compact circuit templates (compiled with toolchain 0.34)
+examples/plain-shop/          A pristine web2 checkout — run the CLI on this
+examples/ecommerce-age-gate/  Integrated: checkbox age-gate → ProveThreshold
+examples/forum-anon-login/    Integrated: real-name login → ProveMembership
+examples/pharmacy-refill/     Integrated: prescription upload → ProveCredentialValid
 scripts/cli-e2e.mjs           Runs the CLI on plain-shop, builds the result, restores it
 scripts/smoke-test.mjs        Predicate accept/reject logic test
 scripts/deploy.mjs            One-time deploy of the three predicate contracts
-docs/                         GO_LIVE · ARCHITECTURE · DEMO_SCRIPT · *.diff.txt
 ```
 
 ---
@@ -202,18 +200,16 @@ compiles the result**.
 
 - **Circuits** — all three compile with the `compact` toolchain **0.34.0**;
   the compiled output is checked in, so the repo runs without the toolchain.
-  `compact/NOTES.md` logs the fixes the first compile needed.
 - **`threshold`** proves `value ≥ threshold` with the value fully private.
-  **`membership`** and **`expiry`** ship a **v1**: the check is against an
-  on-chain `Set` / `Map`, which is pseudonymous (repeat actions by one
-  member link). The fully-anonymous Merkle versions and the upgrade path are
-  in `compact/NOTES.md`.
-- **Live, in a browser** — `LiveMidnightBackend` is complete
-  (wallet discovery → providers → circuit call → submit), but the
-  `@midnight-ntwrk` runtime is WASM + top-level-await and does not bundle in
-  a stock Vite app. `docs/GO_LIVE.md` covers the deploy + Vite setup; until
-  then the examples run their predicate logic in-browser as a preview
-  (`VITE_MZ_LIVE=1` switches to the real backend, no code change).
+  **`membership`** and **`expiry`** ship a **v1** whose set/registry check is
+  pseudonymous; the fully-anonymous Merkle upgrade is noted in
+  [`compact/README.md`](compact/README.md).
+- **Live, in a browser** — `LiveMidnightBackend` is complete (wallet
+  discovery → providers → circuit call → submit). The `@midnight-ntwrk`
+  runtime is WASM + top-level-await and needs a WASM-aware bundler config
+  ([`@midzap/sdk` README](packages/midnightzap-sdk/README.md) → *Real proofs
+  on Midnight*); until that's wired, `InMemoryProofBackend` runs the same
+  predicate logic locally with no setup.
 
 ---
 
@@ -221,12 +217,9 @@ compiles the result**.
 
 ```bash
 npm install
-npm run verify        # build + typecheck + smoke test + CLI e2e + diff-drift
+npm run verify        # build + typecheck + smoke test + CLI end-to-end
 npm run dev           # run the age-gate example (http://localhost:5173)
 ```
-
-Regenerate the before/after diffs after editing an example:
-`npm run gen:diffs`.
 
 ---
 

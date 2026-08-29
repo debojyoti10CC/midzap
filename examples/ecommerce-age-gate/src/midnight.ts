@@ -2,7 +2,7 @@
 //
 // The threshold circuit is already compiled (checked in under
 // src/managed/threshold/). To run real proofs you still need to:
-//   1. deploy it once  — `node scripts/deploy.mjs`  (see docs/GO_LIVE.md)
+//   1. deploy it once  — `node scripts/deploy.mjs`  (see the @midzap/sdk README)
 //   2. paste its address into THRESHOLD_CONTRACT_ADDRESS below
 //   3. install the @midnight-ntwrk/* peer deps
 //

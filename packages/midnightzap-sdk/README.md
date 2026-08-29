@@ -41,9 +41,9 @@ No `useState`, no wallet code, no circuit in your app. The button appears
 once a real zero-knowledge proof that `age ≥ 21` is verified on Midnight.
 The birth year never leaves the browser.
 
-The `contracts` addresses come from a one-time `compactc` compile + deploy —
-see [GO_LIVE.md](https://github.com/debojyoti10CC/midzap/blob/main/docs/GO_LIVE.md).
-Also install the `@midnight-ntwrk/*` peer deps listed there.
+The `contracts` addresses come from a one-time compile + deploy — see
+**Real proofs on Midnight** at the bottom of this file. Until then, pass
+`backend={new InMemoryProofBackend()}` for a working local preview.
 
 ## Three predicates
 
@@ -89,11 +89,11 @@ Or pass `unstyled` and target the stable hooks: `.midnightzap-prove-threshold`,
 `LiveMidnightBackend` is the default — the provider builds it from your
 `contracts` + `network`. It discovers the injected wallet, wires the
 midnight-js providers, loads your compiled circuit, seeds its private state
-on-device, calls it, and submits. Setup: **GO_LIVE.md**.
+on-device, calls it, and submits. See **Real proofs on Midnight** below.
 
 `InMemoryProofBackend` evaluates the same accept/reject rules the circuits
-enforce, offline and deterministically. **Unit tests only** — pass it
-explicitly, never ship it:
+enforce, offline and deterministically. Use it for unit tests and local UI
+previews — pass it explicitly:
 
 ```ts
 import { MidnightZapClient, InMemoryProofBackend } from "@midzap/sdk";
@@ -124,5 +124,54 @@ const { verified, receipt } = await client.prove(
   { kind: "threshold", field: "age", threshold: 21 }, sessionId, { value: 25 },
 );
 ```
+
+## Real proofs on Midnight
+
+`InMemoryProofBackend` gets you a working gate immediately. To produce real
+zero-knowledge proofs on a Midnight network:
+
+**1. Peer dependencies**
+
+```bash
+npm i @midnight-ntwrk/compact-runtime @midnight-ntwrk/dapp-connector-api \
+  @midnight-ntwrk/midnight-js-contracts @midnight-ntwrk/midnight-js-types \
+  @midnight-ntwrk/midnight-js-level-private-state-provider \
+  @midnight-ntwrk/midnight-js-indexer-public-data-provider \
+  @midnight-ntwrk/midnight-js-http-client-proof-provider \
+  @midnight-ntwrk/midnight-js-fetch-zk-config-provider
+```
+
+Plus a Midnight-compatible wallet (Lace, TestNet) and tDUST from the
+faucet.
+
+**2. Compile + deploy the predicate circuit**
+
+The `compact/` templates compile with the `compact` toolchain (0.34.x).
+Deploy each once with your Midnight deploy flow; keep the addresses.
+`threshold` is fully private from `getPrivateValue` alone. `membership` and
+`credential-valid` need extra witness material passed via `getExtraWitness`
+(the Merkle path / the signed-credential fields).
+
+**3. Bundling for the browser**
+
+`@midnight-ntwrk/compact-runtime` pulls a Rust→WASM runtime and the indexer
+provider uses `isomorphic-ws`. A stock bundler can't handle this — you need
+`vite-plugin-wasm`, `vite-plugin-top-level-await`, `vite-plugin-node-polyfills`,
+and a `WebSocket` alias for `isomorphic-ws`. The simplest path is to start
+from a current Midnight example dApp's build config.
+
+**4. Point the provider at your contracts**
+
+```tsx
+<MidnightZapProvider network="testnet" contracts={{
+  threshold:          { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
+  membership:         { address: "0x…", load: () => import("./managed/membership/contract/index.js") },
+  "credential-valid": { address: "0x…", load: () => import("./managed/expiry/contract/index.js") },
+}}>
+```
+
+Same three addresses and compiled params for every app after the first.
+
+---
 
 MIT licensed. Part of the [MidnightZap](https://github.com/debojyoti10CC/midzap) monorepo.

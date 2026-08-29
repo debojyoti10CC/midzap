@@ -2,14 +2,14 @@
 //
 // The expiry circuit is already compiled (checked in under
 // src/managed/expiry/). To run real proofs:
-//   1. deploy it once  — `node scripts/deploy.mjs`  (see docs/GO_LIVE.md)
+//   1. deploy it once  — `node scripts/deploy.mjs`  (see the @midzap/sdk README)
 //   2. register credentials: deployed.callTx.registerCredential(hash, expiresAtUnix)
 //   3. paste the address into EXPIRY_CONTRACT_ADDRESS below
 //   4. install the @midnight-ntwrk/* peer deps
 //
 // v1: the proof reveals the credential hash (a one-way hash, never the
 // document / name / prescriber / dates) and proves its on-chain expiry is
-// still in the future. The fully-hidden Merkle version is in compact/NOTES.md.
+// still in the future. The fully-hidden Merkle version is in compact/README.md.
 //
 // The <ProveCredentialValid> here must also pass the hash for live mode:
 //   getExtraWitness={() => ({ credentialHash })}

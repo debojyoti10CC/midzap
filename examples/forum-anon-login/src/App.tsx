@@ -1,10 +1,9 @@
-// AFTER — same forum, now with anonymous-but-verified posting. Posting
+// An internal feedback forum with anonymous-but-verified posting. Posting
 // still proves you're a real, current employee (no outsider spam), but the
 // proof reveals only that fact, never which employee; a per-action
 // nullifier stops one credential faking multiple "anonymous" posters.
 // The whole integration: wrap the tree in <MidnightZapProvider> and put
 // the composer inside <ProveMembership>; drop `author` from posts.
-// Literal unified diff: docs/forum.diff.txt.
 
 import React, { useState } from "react";
 import { MidnightZapProvider, ProveMembership } from "@midzap/sdk/react";
@@ -80,7 +79,7 @@ export function App() {
       {!LIVE && (
         <p style={{ fontSize: 12, color: "#999", marginTop: 20 }}>
           Local preview — predicate logic runs in-browser. Real Midnight
-          proofs: see docs/GO_LIVE.md, then <code>VITE_MZ_LIVE=1</code>.
+          proofs: see the @midzap/sdk README, then <code>VITE_MZ_LIVE=1</code>.
         </p>
       )}
     </MidnightZapProvider>

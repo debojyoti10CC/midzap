@@ -6,7 +6,7 @@ import react from "@vitejs/plugin-react";
 // setup. It is marked external here so this repo builds; a real deployment
 // needs Midnight's example-dApp Vite config (vite-plugin-wasm +
 // vite-plugin-top-level-await + vite-plugin-node-polyfills + a
-// resolve.alias for isomorphic-ws). See docs/GO_LIVE.md.
+// resolve.alias for isomorphic-ws). See the @midzap/sdk README.
 const midnightExternal = /^@midnight-?ntwrk\//;
 
 export default defineConfig({
