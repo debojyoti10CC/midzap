@@ -40,8 +40,8 @@
 +// Nothing else changes. Literal unified diff: docs/ecommerce.diff.txt.
 +
 +import React, { useState } from "react";
-+import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
-+import { InMemoryProofBackend } from "@midnightzap/sdk";
++import { MidnightZapProvider, ProveThreshold } from "@midzap/sdk/react";
++import { InMemoryProofBackend } from "@midzap/sdk";
 +import { contracts } from "./midnight.js";
 +
 +// The @midnight-ntwrk browser runtime (WASM onchain-runtime + top-level

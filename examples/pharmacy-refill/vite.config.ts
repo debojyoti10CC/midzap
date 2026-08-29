@@ -12,6 +12,6 @@ const midnightExternal = /^@midnight-?ntwrk\//;
 export default defineConfig({
   plugins: [react()],
   server: { port: 5175 },
-  optimizeDeps: { exclude: ["@midnightzap/sdk"] },
+  optimizeDeps: { exclude: ["@midzap/sdk"] },
   build: { rollupOptions: { external: [midnightExternal] } },
 });

@@ -3,7 +3,7 @@
 **Turn an existing web2 app into a Midnight zero-knowledge privacy app — one command.**
 
 ```bash
-npx @midnightzap/cli add age-gate ./my-shop
+npx @midzap/cli add age-gate ./my-shop
 ```
 
 That finds the self-reported control gating an action — an "I am 21+"
@@ -12,7 +12,7 @@ zero-knowledge predicate, wraps your app in a provider, drops in a
 compiled Compact circuit, and patches your build. `--dry-run` shows the
 whole thing as a diff first.
 
-Under the CLI is **`@midnightzap/sdk`**: pre-written, pre-compiled privacy
+Under the CLI is **`@midzap/sdk`**: pre-written, pre-compiled privacy
 **predicates** — "is this value above a threshold", "is this caller in a
 private set", "is this credential still valid" — as drop-in React
 components. No Compact, no circuit, no wallet plumbing in your app.
@@ -44,9 +44,9 @@ my app" a `git diff` you review, not a research project.
 ## The CLI
 
 ```bash
-npx @midnightzap/cli add <recipe> [dir]   # age-gate | anon-login | credential-check
-npx @midnightzap/cli list
-npx @midnightzap/cli doctor [dir]
+npx @midzap/cli add <recipe> [dir]   # age-gate | anon-login | credential-check
+npx @midzap/cli list
+npx @midzap/cli doctor [dir]
   --dry-run   print the diff, write nothing
 ```
 
@@ -56,7 +56,7 @@ compiled circuit, `vite.config.*` (marks the Midnight WASM runtime
 external), and `package.json`. Try it on the bundled demo target:
 
 ```bash
-npx @midnightzap/cli add age-gate examples/plain-shop --dry-run
+npx @midzap/cli add age-gate examples/plain-shop --dry-run
 ```
 
 Full reference: [`packages/midnightzap-cli/README.md`](packages/midnightzap-cli/README.md).
@@ -144,12 +144,12 @@ same on every push — `.github/workflows/ci.yml`.
 
 Full version in `docs/GO_LIVE.md`; the shape:
 
-1. `npm install @midnightzap/sdk` plus the `@midnight-ntwrk/*` peer deps.
+1. `npm install @midzap/sdk` plus the `@midnight-ntwrk/*` peer deps.
 2. Wrap the subtree that needs a gate, once, pointing at your deployed
    contracts (the addresses come from the one-time deploy in
    `docs/GO_LIVE.md`):
    ```tsx
-   import { MidnightZapProvider } from "@midnightzap/sdk/react";
+   import { MidnightZapProvider } from "@midzap/sdk/react";
 
    <MidnightZapProvider network="testnet" contracts={{
      threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
@@ -201,7 +201,7 @@ from the example source.
   compiled circuits; a pluggable backend (`LiveMidnightBackend` by default);
   three worked integrations plus the CLI conversion, all tested.
 - **Originality** — Midnight's hackathon history is one-off identity apps.
-  This is the tooling layer: `npx @midnightzap/cli add age-gate` turns
+  This is the tooling layer: `npx @midzap/cli add age-gate` turns
   "integrate Midnight" into a reviewable diff.
 - **Execution** — `npm run verify` builds the SDK + CLI, typechecks 6
   workspaces, runs the predicate logic test, and runs a **CLI end-to-end

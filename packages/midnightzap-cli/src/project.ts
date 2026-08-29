@@ -63,7 +63,7 @@ export function ensureImport(src: string, mod: string, names: string[]): string 
 /** Wrap the app root render in <MidnightZapProvider …>. Idempotent. */
 export function ensureProvider(src: string, providerProps: string): { text: string; wrapped: boolean } {
   if (src.includes("<MidnightZapProvider")) return { text: src, wrapped: false };
-  let out = ensureImport(src, "@midnightzap/sdk/react", ["MidnightZapProvider"]);
+  let out = ensureImport(src, "@midzap/sdk/react", ["MidnightZapProvider"]);
   out = ensureImport(out, "./midnight.js", ["contracts", "backend"]);
 
   // createRoot(...).render(<App />)

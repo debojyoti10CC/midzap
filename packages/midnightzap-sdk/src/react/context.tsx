@@ -50,7 +50,7 @@ export interface MidnightZapProviderProps {
 /**
  * Wrap your app — or just the subtree that needs a privacy gate — once:
  *
- *   import { MidnightZapProvider } from "@midnightzap/sdk/react";
+ *   import { MidnightZapProvider } from "@midzap/sdk/react";
  *
  *   <MidnightZapProvider contracts={{
  *     threshold: { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },

@@ -1,5 +1,5 @@
 // Copies the compiled Compact circuits from the example workspaces into
-// recipes/managed/ so the published @midnightzap/cli package ships them.
+// recipes/managed/ so the published @midzap/cli package ships them.
 // In the monorepo the CLI reads them straight from examples/ instead, so
 // this only matters for `npm publish` (wired as prepublishOnly).
 import { cpSync, mkdirSync, existsSync } from "node:fs";

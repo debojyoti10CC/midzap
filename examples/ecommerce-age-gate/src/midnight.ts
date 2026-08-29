@@ -9,7 +9,7 @@
 // Until the address is set, the checkout renders and clicking "Prove age…"
 // returns a clear "no deployed contract" error — never a fake success.
 
-import type { ContractBindings } from "@midnightzap/sdk";
+import type { ContractBindings } from "@midzap/sdk";
 
 export const THRESHOLD_CONTRACT_ADDRESS = "0xREPLACE_WITH_DEPLOYED_THRESHOLD_ADDRESS";
 

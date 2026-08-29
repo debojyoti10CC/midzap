@@ -1,5 +1,5 @@
 {
-  "name": "@midnightzap/sdk",
+  "name": "@midzap/sdk",
   "version": "0.1.0",
   "description": "Drop-in privacy SDK: add Midnight zero-knowledge verification to any existing web2 app in minutes.",
   "keywords": [
@@ -15,7 +15,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/debojyoti10CC/midzap.git",
+    "url": "git+https://github.com/debojyoti10CC/midzap.git",
     "directory": "packages/midnightzap-sdk"
   },
   "homepage": "https://github.com/debojyoti10CC/midzap#readme",
@@ -61,15 +61,33 @@
     "@midnight-ntwrk/midnight-js-fetch-zk-config-provider": "*"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "@midnight-ntwrk/dapp-connector-api": { "optional": true },
-    "@midnight-ntwrk/midnight-js-contracts": { "optional": true },
-    "@midnight-ntwrk/midnight-js-types": { "optional": true },
-    "@midnight-ntwrk/midnight-js-level-private-state-provider": { "optional": true },
-    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": { "optional": true },
-    "@midnight-ntwrk/midnight-js-http-client-proof-provider": { "optional": true },
-    "@midnight-ntwrk/midnight-js-fetch-zk-config-provider": { "optional": true },
-    "@midnight-ntwrk/compact-runtime": { "optional": true }
+    "react": {
+      "optional": true
+    },
+    "@midnight-ntwrk/dapp-connector-api": {
+      "optional": true
+    },
+    "@midnight-ntwrk/midnight-js-contracts": {
+      "optional": true
+    },
+    "@midnight-ntwrk/midnight-js-types": {
+      "optional": true
+    },
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": {
+      "optional": true
+    },
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": {
+      "optional": true
+    },
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": {
+      "optional": true
+    },
+    "@midnight-ntwrk/midnight-js-fetch-zk-config-provider": {
+      "optional": true
+    },
+    "@midnight-ntwrk/compact-runtime": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

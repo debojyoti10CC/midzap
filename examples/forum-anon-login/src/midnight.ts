@@ -11,7 +11,7 @@
 // it is pseudonymous (repeat actions by one member are linkable). The
 // fully-anonymous Merkle version is described in compact/NOTES.md.
 
-import type { ContractBindings } from "@midnightzap/sdk";
+import type { ContractBindings } from "@midzap/sdk";
 
 export const MEMBERSHIP_CONTRACT_ADDRESS = "0xREPLACE_WITH_DEPLOYED_MEMBERSHIP_ADDRESS";
 

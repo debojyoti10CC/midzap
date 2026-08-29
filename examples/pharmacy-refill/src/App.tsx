@@ -7,8 +7,8 @@
 // Literal unified diff: docs/pharmacy.diff.txt.
 
 import React, { useState } from "react";
-import { MidnightZapProvider, ProveCredentialValid } from "@midnightzap/sdk/react";
-import { InMemoryProofBackend } from "@midnightzap/sdk";
+import { MidnightZapProvider, ProveCredentialValid } from "@midzap/sdk/react";
+import { InMemoryProofBackend } from "@midzap/sdk";
 import { contracts } from "./midnight.js";
 
 // See ecommerce-age-gate/src/App.tsx: @midnight-ntwrk browser runtime

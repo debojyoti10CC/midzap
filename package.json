@@ -8,8 +8,8 @@
     "examples/*"
   ],
   "scripts": {
-    "build:sdk": "npm run build --workspace=@midnightzap/sdk",
-    "build:cli": "npm run build --workspace=@midnightzap/cli",
+    "build:sdk": "npm run build --workspace=@midzap/sdk",
+    "build:cli": "npm run build --workspace=@midzap/cli",
     "build:examples": "npm run build --workspace=plain-shop && npm run build --workspace=ecommerce-age-gate && npm run build --workspace=forum-anon-login && npm run build --workspace=pharmacy-refill",
     "build": "npm run build:sdk && npm run build:cli && npm run build:examples",
     "dev": "npm run dev --workspace=ecommerce-age-gate",

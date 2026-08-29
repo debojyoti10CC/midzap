@@ -118,13 +118,13 @@ of it is transmitted.
 ## Incorporating into any other app (the ~5-minute part)
 
 ```bash
-npm i @midnightzap/sdk
+npm i @midzap/sdk
 # compile the templates into src/managed/ (once), then copy to public/:
 cp -r src/managed public/
 ```
 
 ```tsx
-import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
+import { MidnightZapProvider, ProveThreshold } from "@midzap/sdk/react";
 
 <MidnightZapProvider contracts={{
   threshold:          { address: "0x…", load: () => import("./managed/threshold/contract/index.js") },
@@ -145,7 +145,7 @@ Same three addresses, same compiled params. Real proofs, no mock.
 
 ## Testing without a network
 
-`InMemoryProofBackend` (exported from `@midnightzap/sdk`) evaluates the same
+`InMemoryProofBackend` (exported from `@midzap/sdk`) evaluates the same
 accept/reject rules the circuits enforce, deterministically and offline.
 Use it in unit tests only — pass it explicitly as `backend`. It is not a
 way to run the app, and it does not generate proofs.

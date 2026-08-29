@@ -19,7 +19,7 @@ Required opening line, on camera, first:
 
 ## 0:15–0:50 — The conversion (screen: terminal, full-screen)
 
-- Run: `npx @midnightzap/cli add age-gate ./plain-shop --dry-run`
+- Run: `npx @midzap/cli add age-gate ./plain-shop --dry-run`
 - The diff prints: **one import**, the `<input type="checkbox">` block
   swapped for `<ProveThreshold field="age" threshold={21}>`, the app root
   wrapped in `<MidnightZapProvider>`, `vite.config` patched, a
@@ -41,7 +41,7 @@ Required opening line, on camera, first:
 
 ## 1:15–1:35 — Not a one-trick (screen: `midnightzap list`, then the repo)
 
-- `npx @midnightzap/cli list` — `age-gate`, `anon-login`, `credential-check`.
+- `npx @midzap/cli list` — `age-gate`, `anon-login`, `credential-check`.
 - Flash the three before/after example diffs (`docs/*.diff.txt`): "Same
   move for an anonymous-but-verified forum login, and a 'prescription still
   valid' check with no document upload."
@@ -55,7 +55,7 @@ Required opening line, on camera, first:
 
 ## Prep checklist
 
-- [ ] `packages/midnightzap-cli` and `@midnightzap/sdk` built
+- [ ] `packages/midnightzap-cli` and `@midzap/sdk` built
       (`npm run build:sdk build:cli`), a **pristine** copy of
       `examples/plain-shop` ready to convert on camera.
 - [ ] Terminal font large; `--dry-run` output fits without scrolling.

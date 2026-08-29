@@ -1,6 +1,6 @@
-// End-to-end check for @midnightzap/cli.
+// End-to-end check for @midzap/cli.
 //
-// Runs `midnightzap add age-gate` against the pristine `examples/plain-shop`
+// Runs `midzap add age-gate` against the pristine `examples/plain-shop`
 // workspace in place, asserts the codemod output, typechecks + builds the
 // result, then restores plain-shop with git. Proves the CLI produces a
 // compiling Midnight app.
@@ -14,7 +14,7 @@ const cli = join(root, "packages/midnightzap-cli/dist/cli.js");
 const app = join(root, "examples/plain-shop");
 const sh = process.platform === "win32";
 
-if (!existsSync(cli)) fail("build the CLI first (npm run build --workspace=@midnightzap/cli)");
+if (!existsSync(cli)) fail("build the CLI first (npm run build --workspace=@midzap/cli)");
 
 let dirty = false;
 try {

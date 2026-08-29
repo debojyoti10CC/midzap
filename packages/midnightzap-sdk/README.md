@@ -1,4 +1,4 @@
-# @midnightzap/sdk
+# @midzap/sdk
 
 **Add a Midnight zero-knowledge privacy gate to an existing app without writing Compact.**
 
@@ -6,13 +6,13 @@ Pick a predicate, hand it a getter for the private value, wrap the thing
 you're gating. That's the integration.
 
 ```bash
-npm install @midnightzap/sdk
+npm install @midzap/sdk
 ```
 
 ## Integration
 
 ```tsx
-import { MidnightZapProvider, ProveThreshold } from "@midnightzap/sdk/react";
+import { MidnightZapProvider, ProveThreshold } from "@midzap/sdk/react";
 
 function App() {
   return (
@@ -96,7 +96,7 @@ enforce, offline and deterministically. **Unit tests only** — pass it
 explicitly, never ship it:
 
 ```ts
-import { MidnightZapClient, InMemoryProofBackend } from "@midnightzap/sdk";
+import { MidnightZapClient, InMemoryProofBackend } from "@midzap/sdk";
 
 const client = new MidnightZapClient({ backend: new InMemoryProofBackend() });
 const { verified } = await client.prove(
@@ -110,7 +110,7 @@ const { verified } = await client.prove(
 Drive `MidnightZapClient` directly with `LiveMidnightBackend`:
 
 ```ts
-import { MidnightZapClient, LiveMidnightBackend } from "@midnightzap/sdk";
+import { MidnightZapClient, LiveMidnightBackend } from "@midzap/sdk";
 
 const client = new MidnightZapClient({
   backend: new LiveMidnightBackend({

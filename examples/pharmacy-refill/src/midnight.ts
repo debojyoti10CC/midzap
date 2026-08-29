@@ -14,7 +14,7 @@
 // The <ProveCredentialValid> here must also pass the hash for live mode:
 //   getExtraWitness={() => ({ credentialHash })}
 
-import type { ContractBindings } from "@midnightzap/sdk";
+import type { ContractBindings } from "@midzap/sdk";
 
 export const EXPIRY_CONTRACT_ADDRESS = "0xREPLACE_WITH_DEPLOYED_EXPIRY_ADDRESS";
 
