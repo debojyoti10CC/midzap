@@ -16,7 +16,7 @@ import {
 import { c, step, ok, warn, fail, unifiedDiff } from "./util.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const SDK_VERSION = "^0.1.0";
+const SDK_VERSION = "^0.1.1";
 
 function help() {
   console.log(`
