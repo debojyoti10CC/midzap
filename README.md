@@ -2,9 +2,7 @@
 
 # MidnightZap — zero-knowledge privacy in your app in minutes
 
-<!-- Drop a banner at docs/banner.png and uncomment:
-<img width="1200" alt="MidnightZap" src="docs/banner.png" />
--->
+<img width="1200" height="675" alt="Bring" src="https://github.com/user-attachments/assets/4637d774-de30-4691-b0be-c678db5e0417" />
 
 [![@midzap/sdk](https://img.shields.io/npm/v/@midzap/sdk?label=%40midzap%2Fsdk&color=16213e)](https://www.npmjs.com/package/@midzap/sdk)
 [![@midzap/cli](https://img.shields.io/npm/v/@midzap/cli?label=%40midzap%2Fcli&color=16213e)](https://www.npmjs.com/package/@midzap/cli)
