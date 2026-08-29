@@ -42,7 +42,7 @@ once a real zero-knowledge proof that `age ≥ 21` is verified on Midnight.
 The birth year never leaves the browser.
 
 The `contracts` addresses come from a one-time `compactc` compile + deploy —
-see [GO_LIVE.md](https://github.com/midnightzap/midnightzap/blob/main/docs/GO_LIVE.md).
+see [GO_LIVE.md](https://github.com/debojyoti10CC/midzap/blob/main/docs/GO_LIVE.md).
 Also install the `@midnight-ntwrk/*` peer deps listed there.
 
 ## Three predicates
@@ -125,4 +125,4 @@ const { verified, receipt } = await client.prove(
 );
 ```
 
-MIT licensed. Part of the [MidnightZap](https://github.com/midnightzap/midnightzap) monorepo.
+MIT licensed. Part of the [MidnightZap](https://github.com/debojyoti10CC/midzap) monorepo.

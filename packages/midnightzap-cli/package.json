@@ -2,13 +2,26 @@
   "name": "@midnightzap/cli",
   "version": "0.1.0",
   "description": "Convert an existing web2 React app to a Midnight zero-knowledge privacy app — one command.",
-  "keywords": ["midnight", "zero-knowledge", "codemod", "cli", "privacy", "compact"],
+  "keywords": ["midnight", "zero-knowledge", "codemod", "cli", "privacy", "compact", "web3"],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/debojyoti10CC/midzap.git",
+    "directory": "packages/midnightzap-cli"
+  },
+  "homepage": "https://github.com/debojyoti10CC/midzap#readme",
+  "bugs": "https://github.com/debojyoti10CC/midzap/issues",
   "type": "module",
   "bin": {
     "midnightzap": "./dist/cli.js"
   },
-  "files": ["dist", "recipes", "README.md"],
+  "files": ["dist", "recipes", "README.md", "LICENSE"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
