@@ -40,7 +40,8 @@
     "build": "npm run clean && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "sync:circuits": "node scripts/sync-circuits.mjs",
-    "prepublishOnly": "npm run build && npm run sync:circuits"
+    "prepublishOnly": "npm run build && npm run sync:circuits",
+    "test": "node --test test/recipes.test.mjs"
   },
   "dependencies": {},
   "devDependencies": {

@@ -28,6 +28,9 @@ jobs:
       - name: Predicate smoke test
         run: node scripts/smoke-test.mjs
 
+      - name: CLI recipe unit tests
+        run: node --test packages/midnightzap-cli/test/recipes.test.mjs
+
       - name: Build example integrations
         run: npm run build:examples
 

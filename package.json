@@ -20,7 +20,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run build:sdk && node scripts/smoke-test.mjs",
     "cli:e2e": "npm run build:sdk && npm run build:cli && node scripts/cli-e2e.mjs",
-    "verify": "npm run build:sdk && npm run build:cli && npm run typecheck && node scripts/smoke-test.mjs && node scripts/cli-e2e.mjs"
+    "verify": "npm run build:sdk && npm run build:cli && npm run typecheck && node scripts/smoke-test.mjs && node --test packages/midnightzap-cli/test/recipes.test.mjs && node scripts/cli-e2e.mjs",
+    "cli:test": "npm run build:cli && node --test packages/midnightzap-cli/test/recipes.test.mjs"
   },
   "devDependencies": {
     "@midnight-ntwrk/compact-runtime": "^0.19.0",
